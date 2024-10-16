@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kickbike Control</title>
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js"; // Import for Realtime Database
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAPBxUbUF_d5VuDJoBCRuMtLIKIZp7yJwU",
+      authDomain: "e-kickbike.firebaseapp.com",
+      projectId: "e-kickbike",
+      storageBucket: "e-kickbike.appspot.com",
+      messagingSenderId: "1001690866712",
+      appId: "1:1001690866712:web:213dff12eec8d41adf4f6d",
+      measurementId: "G-LD6T8FHX8F",
+      databaseURL: "https://e-kickbike-default-rtdb.firebaseio.com/"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const database = getDatabase(app); // Initialize Realtime Database
+
+    // Function to send data to Firebase
+    function sendKickbikeCommand(command) {
+      // Define a reference to the 'kickbike/command' location in the database
+      const commandRef = ref(database, 'kickbike/command');
+      
+      // Write the command to Firebase
+      set(commandRef, {
+        action: command
+      }).then(() => {
+        document.getElementById('status').innerText = `Command ${command} sent successfully!`;
+      }).catch((error) => {
+        document.getElementById('status').innerText = `Error sending command: ${error.message}`;
+      });
+    }
+
+    // Make the sendCommand function globally accessible
+    window.sendCommand = function() {
+      const command = document.getElementById('command').value; // Get the command from the input field
+      if (command) {
+        sendKickbikeCommand(command); // Send the command to Firebase
+      } else {
+        document.getElementById('status').innerText = 'Please enter a command!';
+      }
+    };
+  </script>
+</head>
+<body>
+  <h2>Kickbike Control Interface</h2>
+
+  <!-- Input to take the command -->
+  <label for="command">Enter Command (e.g., 'start' or 'stop'):</label>
+  <input type="text" id="command" placeholder="Enter command here">
+  <button onclick="sendCommand()">Send Command</button>
+
+  <!-- Status output -->
+  <p id="status"></p>
+</body>
+</html>
