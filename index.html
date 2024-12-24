@@ -62,7 +62,7 @@
     // Start/Stop button functionality
     document.getElementById('startButton').addEventListener('click', () => {
       firebase.database().ref('kickbike/command').set(
-        { action: 'Start' })
+        { action: 'start' })
         .then(() => {
           alert('Kickbike started!');
         })
