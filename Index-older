@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html>
+
+
+
+<head>
+
+  <title>Kickbike Control</title>
+
+  <!-- Firebase SDKs -->
+
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+  <style>
+
+    body {
+
+      font-family: Arial, sans-serif;
+
+      text-align: center;
+
+      margin-top: 50px;
+
+    }
+
+
+
+    button {
+
+      padding: 10px 20px;
+
+      font-size: 16px;
+
+      margin: 10px;
+
+      border: none;
+
+      border-radius: 5px;
+
+      cursor: pointer;
+
+    }
+
+
+
+    #startButton {
+
+      background-color: green;
+
+      color: white;
+
+    }
+
+
+
+    #stopButton {
+
+      background-color: red;
+
+      color: white;
+
+    }
+
+  </style>
+
+</head>
+
+
+
+<body>
+
+  <h1>Kickbike Control</h1>
+
+  <p>Control the kickbike by sending START/STOP signals to Firebase.</p>
+
+
+
+  <!-- Buttons -->
+
+  <button id="startButton">Start</button>
+
+  <button id="stopButton">Stop</button>
+
+
+
+  <script>
+
+    // Firebase configuration
+
+    const firebaseConfig = {
+
+      apiKey: "AIzaSyAPBxUbUF_d5VuDJoBCRuMtLIKIZp7yJwU",
+
+      authDomain: "e-kickbike.firebaseapp.com",
+
+      databaseURL: "https://e-kickbike-default-rtdb.firebaseio.com",
+
+      projectId: "e-kickbike",
+
+      storageBucket: "e-kickbike.firebasestorage.app",
+
+      messagingSenderId: "1001690866712",
+
+      appId: "1:1001690866712:web:213dff12eec8d41adf4f6d",
+
+      measurementId: "G-LD6T8FHX8F"
+
+    };
+
+
+
+    // Initialize Firebase
+
+    const app = firebase.initializeApp(firebaseConfig);
+
+    const database = firebase.database(app);
+
+
+
+    // Start/Stop button functionality
+
+    document.getElementById('startButton').addEventListener('click', () => {
+
+      firebase.database().ref('kickbike/command').set(
+
+        { action: 'start' })
+
+        .then(() => {
+
+          alert('Kickbike started!');
+
+        })
+
+        .catch((error) => {
+
+          console.error('Error updating Firebase:', error);
+
+          alert('Failed to update Firebase.');
+
+        });
+
+    });
+
+
+
+    document.getElementById('stopButton').addEventListener('click', () => {
+
+      firebase.database().ref('kickbike/command').set(
+
+        { action: 'Stop' })
+
+        .then(() => {
+
+          alert('Kickbike stopped!');
+
+        })
+
+        .catch((error) => {
+
+          console.error('Error updating Firebase:', error);
+
+          alert('Failed to update Firebase.');
+
+        });
+
+    });
+
+  </script>
+
+</body>
+
+
+
+</html>
