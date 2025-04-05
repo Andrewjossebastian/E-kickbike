@@ -1,89 +1,1627 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-  <title>Kickbike Control</title>
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 50px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Kickbike Rental - Eco-Friendly Urban Mobility</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles */
+        :root {
+            --primary-color: #00A651; /* Green */
+            --secondary-color: #0066CC; /* Blue */
+            --accent-color: #FF6B35; /* Orange */
+            --light-color: #FFFFFF;
+            --dark-color: #333333;
+            --grey-color: #F5F5F5;
+            --light-grey-color: #e9ecef;
+            --border-color: #ddd;
+            --danger-color: #ff3b30;
+            --success-color: #34c759; /* iOS Green */
+            --border-radius: 8px;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
 
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin: 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    #startButton {
-      background-color: green;
-      color: white;
-    }
+        html {
+            scroll-behavior: smooth; /* Smooth scrolling for anchor links */
+            font-size: 16px; /* Base font size */
+        }
 
-    #stopButton {
-      background-color: red;
-      color: white;
-    }
-  </style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            color: var(--dark-color);
+            background-color: var(--light-color);
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header styles */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--light-color);
+            box-shadow: var(--box-shadow);
+            z-index: 1000;
+            padding: 15px 0;
+            transition: var(--transition);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens if needed */
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: clamp(1.3rem, 4vw, 1.5rem); /* Responsive font size */
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            animation: pulse 2s infinite;
+            font-size: 1.8rem;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Desktop Navigation */
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark-color);
+            font-weight: 500;
+            position: relative;
+            padding-bottom: 5px;
+            transition: var(--transition);
+        }
+
+        .nav-links a:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--primary-color);
+        }
+
+        .nav-links a:hover:after,
+        .nav-links a.active:after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Poppins', Arial, sans-serif;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            font-size: 0.95rem; /* Slightly smaller base button size */
+        }
+        .btn-lg { /* Larger button variant */
+             padding: 12px 25px;
+             font-size: 1rem;
+        }
+        .btn-sm { /* Smaller button variant */
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--light-color);
+        }
+        .btn-primary:hover {
+            background-color: #008c44;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: var(--light-color);
+        }
+        .btn-secondary:hover {
+            background-color: #0055aa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: var(--light-color);
+        }
+        .btn-danger:hover {
+            background-color: #e6352b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: var(--light-color);
+            transform: translateY(-2px);
+        }
+        .btn-subtle { /* New subtle button style */
+             background-color: var(--light-grey-color);
+             color: var(--dark-color);
+             border: 1px solid var(--border-color);
+        }
+        .btn-subtle:hover {
+             background-color: #dcdcdc;
+             border-color: #c5c5c5;
+        }
+
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none; /* Hidden by default */
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--dark-color);
+            cursor: pointer;
+            z-index: 1100;
+        }
+
+        /* Mobile Navigation Menu */
+        .mobile-nav {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            right: -100%; /* Start off-screen */
+            width: 70%;
+            max-width: 300px;
+            height: 100vh;
+            background-color: var(--light-color);
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            flex-direction: column;
+            align-items: center;
+            padding-top: 80px; /* Space for header */
+            z-index: 1050;
+            transition: right 0.4s ease-in-out;
+        }
+        .mobile-nav.active {
+            right: 0; /* Slide in */
+            display: flex;
+        }
+        .mobile-nav a {
+            text-decoration: none;
+            color: var(--dark-color);
+            font-size: 1.2rem;
+            padding: 15px 0;
+            width: 80%;
+            text-align: center;
+            border-bottom: 1px solid var(--grey-color);
+            transition: background-color 0.2s ease;
+        }
+        .mobile-nav a:hover {
+            background-color: var(--grey-color);
+            color: var(--primary-color);
+        }
+        .mobile-nav .auth-buttons-mobile {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 80%;
+        }
+        .mobile-nav .auth-buttons-mobile .btn {
+            width: 100%;
+        }
+
+        /* Mobile Menu Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1040; /* Below mobile nav, above content */
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+        }
+        .overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            transition: filter 0.4s ease; /* Transition for blur effect */
+        }
+        .main-content.blurred {
+             filter: blur(5px); /* Blur background when modal/overlay is active */
+             pointer-events: none; /* Prevent interaction with blurred content */
+        }
+
+        /* Hero section */
+        .hero {
+            padding-top: 140px; /* Adjusted padding top for fixed header */
+            padding-bottom: 80px; /* Increased padding bottom */
+            background: linear-gradient(135deg, #eef9f2 0%, #d9f0e3 100%); /* Lighter green gradient */
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+        }
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .hero h1 {
+            font-size: clamp(2rem, 6vw, 3.2rem);
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            font-weight: 700;
+        }
+        .hero p {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            margin-bottom: 35px;
+            color: #444;
+            max-width: 600px;
+        }
+
+        /* Section Styles */
+        section {
+            padding: 80px 0; /* Increased default section padding */
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px; /* Increased margin */
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            color: var(--dark-color);
+            font-weight: 600;
+            position: relative;
+        }
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        /* How It Works Section */
+        #howItWorks {
+            background-color: var(--light-color);
+        }
+        .how-it-works-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        .step-card {
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px 25px;
+            text-align: center;
+            border-top: 4px solid var(--primary-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .step-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        .step-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            line-height: 1;
+        }
+        .step-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            color: var(--dark-color);
+        }
+        .step-card p {
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        /* Payment section */
+        #payment {
+            background-color: var(--grey-color);
+        }
+        .payment-options {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+        .payment-card {
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            width: 160px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+        .payment-card:hover {
+            border-color: var(--primary-color);
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        }
+        .payment-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+            transition: color 0.3s ease;
+        }
+        .payment-card:hover .payment-icon {
+            color: var(--primary-color);
+        }
+        .payment-card p {
+            font-weight: 500;
+            color: var(--dark-color);
+            font-size: 0.9rem; /* Slightly smaller text */
+        }
+
+        /* Ride Control section */
+        #rideControl {
+            background-color: var(--light-grey-color); /* Changed background */
+            display: none; /* Initially hidden */
+        }
+        .control-card {
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .control-card h2 {
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            font-size: 1.8rem;
+        }
+        .control-card p {
+            margin-bottom: 30px;
+            color: #555;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+        }
+        .button-container .btn {
+            padding: 12px 25px;
+            font-size: 1rem;
+        }
+
+        /* Battery status */
+        .battery-status {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .battery-status h3 {
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .battery-container {
+            width: 220px;
+            height: 35px;
+            border: 2px solid #ccc;
+            border-radius: 18px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 15px;
+            background-color: var(--light-grey-color);
+        }
+        .battery-level {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 75%; /* Default value, updated by JS */
+            border-radius: 16px 0 0 16px; /* Round only left side initially */
+            transition: width 1s ease, background-color 0.5s ease;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        .battery-level.full { /* Style for full battery */
+            border-radius: 16px;
+        }
+        #batteryPercentage, #estimatedTime {
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        /* NEW: Featured Routes & Safety Tips Section */
+        #routesSafety {
+            background-color: var(--light-color);
+        }
+        .routes-safety-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+        .routes-card, .safety-card {
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            border-left: 5px solid var(--primary-color); /* Accent border */
+        }
+         .routes-card h3, .safety-card h3 {
+             margin-bottom: 20px;
+             font-size: 1.5rem;
+             color: var(--dark-color);
+             display: flex;
+             align-items: center;
+             gap: 10px;
+         }
+         .routes-card h3 i, .safety-card h3 i {
+             color: var(--primary-color);
+         }
+
+         .route-item {
+             margin-bottom: 15px;
+             padding-bottom: 15px;
+             border-bottom: 1px solid var(--light-grey-color);
+         }
+         .route-item:last-child {
+             margin-bottom: 0;
+             padding-bottom: 0;
+             border-bottom: none;
+         }
+         .route-item h4 {
+             margin-bottom: 5px;
+             font-size: 1.1rem;
+             font-weight: 600;
+         }
+         .route-item p {
+             font-size: 0.95rem;
+             color: #555;
+         }
+         .safety-tips-list {
+             list-style: none;
+             padding-left: 0;
+         }
+         .safety-tips-list li {
+             margin-bottom: 12px;
+             display: flex;
+             align-items: flex-start; /* Align icon with text start */
+             gap: 10px;
+             font-size: 0.95rem;
+             color: #555;
+         }
+         .safety-tips-list i {
+             color: var(--success-color); /* Green check for safety */
+             margin-top: 4px; /* Align icon slightly lower */
+             flex-shrink: 0; /* Prevent icon from shrinking */
+         }
+
+
+        /* Features section */
+        #features {
+            background-color: var(--grey-color);
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 35px;
+            margin-top: 40px;
+        }
+        .feature-card {
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 35px 30px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-bottom-color 0.3s ease;
+            border-bottom: 4px solid transparent;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-bottom-color: var(--primary-color);
+        }
+        .feature-icon {
+            font-size: 3.5rem;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+        }
+        .feature-card h3 {
+            margin-bottom: 15px;
+            color: var(--dark-color);
+            font-size: 1.4rem;
+        }
+        .feature-card p {
+            color: #555;
+            font-size: 1rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark-color);
+            color: #ccc;
+            padding: 60px 0 30px;
+        }
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        .footer-column h3 {
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+            color: var(--light-color);
+            font-weight: 600;
+        }
+        .footer-links {
+            list-style: none;
+        }
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        .footer-links a {
+            color: #aaa;
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-flex; /* Align icon and text */
+            align-items: center;
+            gap: 8px;
+        }
+        .footer-links a:hover {
+            color: var(--light-color);
+            padding-left: 5px;
+        }
+        .footer-links i {
+            width: 16px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid #444;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        /* Modal Styles (Login/Signup) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0; /* Start hidden for transition */
+            transition: opacity 0.3s ease;
+            /* backdrop-filter: blur(5px); /* Optional: Add blur effect */
+        }
+        .modal.active {
+             display: flex;
+             opacity: 1;
+        }
+
+        .modal-content {
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            padding: 30px 40px;
+            max-width: 450px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: scale(0.95); /* Start slightly smaller */
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+        .modal.active .modal-content {
+             transform: scale(1); /* Scale to full size */
+        }
+
+        .modal-content h2 {
+            margin-bottom: 25px;
+            color: var(--dark-color);
+            font-size: 1.6rem;
+        }
+        .modal-content p {
+            margin-bottom: 25px;
+            color: #555;
+            font-size: 1.1rem;
+        }
+        .modal-content .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .modal-content label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+        }
+        .modal-content input[type="email"],
+        .modal-content input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .modal-content input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 166, 81, 0.2); /* Focus ring */
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.2s ease;
+            line-height: 1;
+            background: none; /* Ensure it's a button */
+            border: none;
+            padding: 5px; /* Add padding for easier clicking */
+        }
+        .close-modal:hover {
+            color: var(--dark-color);
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap; /* Allow buttons to wrap */
+        }
+        .modal-buttons .btn {
+            padding: 12px 25px;
+        }
+
+        /* UPDATED: Payment Confirmation View Styles */
+        #paymentConfirmationView {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(245, 245, 245, 0.98); /* Slightly off-white overlay */
+            z-index: 1500; /* Above main content, below modals */
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        #paymentConfirmationView.active {
+            display: flex; /* Use flex for centering */
+            opacity: 1;
+        }
+        .payment-confirmation-content {
+            background-color: var(--light-color);
+            padding: 40px 50px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            max-width: 500px;
+            width: 90%;
+        }
+        .payment-confirmation-content h2 {
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            font-size: 1.7rem;
+        }
+        .payment-confirmation-content p {
+            margin-bottom: 15px;
+            color: #555;
+            font-size: 1.1rem;
+        }
+        .payment-amount {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 20px 0;
+        }
+        .payment-method-display {
+            font-style: italic;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .spinner { /* Simple CSS Spinner */
+            border: 4px solid var(--light-grey-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none; /* Hidden initially */
+        }
+        #paymentStatus {
+            margin-top: 20px;
+            font-weight: 500;
+            min-height: 24px; /* Reserve space */
+        }
+        #paymentStatus.success {
+            color: var(--success-color);
+        }
+        #paymentStatus.error {
+            color: var(--danger-color);
+        }
+        .payment-confirmation-buttons {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        /* Ensure Pay Now button is styled well */
+        #payNowBtn {
+             min-width: 120px; /* Give it some minimum width */
+        }
+
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .container {
+                max-width: 960px;
+            }
+            .nav-links {
+                gap: 20px; /* Reduce gap */
+            }
+            .footer-container {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            html {
+                font-size: 15px; /* Slightly smaller base font on tablets */
+            }
+            .nav-links, .auth-buttons {
+                display: none; /* Hide desktop nav and auth buttons */
+            }
+            .mobile-menu-btn {
+                display: block; /* Show mobile menu button */
+            }
+            .header-container {
+                padding: 0 15px; /* Ensure padding consistency */
+            }
+            .hero {
+                padding-top: 120px; /* Adjust hero padding */
+                min-height: 50vh;
+            }
+            section {
+                padding: 60px 0; /* Reduce section padding */
+            }
+            .section-title {
+                margin-bottom: 40px;
+            }
+            .how-it-works-grid, .features-grid, .routes-safety-container {
+                grid-template-columns: 1fr; /* Stack cards */
+                gap: 25px;
+            }
+            .payment-options {
+                gap: 15px;
+            }
+            .payment-card {
+                width: calc(50% - 10px); /* Two cards per row */
+                padding: 20px;
+            }
+            .footer-container {
+                grid-template-columns: 1fr; /* Stack footer columns */
+                text-align: center;
+            }
+            .footer-links {
+                padding-left: 0;
+                display: inline-block; /* Center links */
+                text-align: left;
+            }
+            .modal-content {
+                padding: 25px 20px;
+            }
+            .payment-confirmation-content {
+                 padding: 30px 25px;
+            }
+            .payment-amount {
+                 font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            html {
+                font-size: 14px; /* Smaller base font on small mobiles */
+            }
+            .logo {
+                font-size: 1.2rem; /* Smaller logo */
+            }
+            .logo-icon {
+                font-size: 1.6rem;
+            }
+            .hero h1 {
+                font-size: 1.8rem; /* Smaller hero heading */
+            }
+            .hero p {
+                font-size: 0.95rem; /* Smaller hero text */
+            }
+            .btn {
+                 padding: 8px 16px; /* Smaller buttons */
+                 font-size: 0.9rem;
+            }
+            .btn-lg {
+                 padding: 10px 20px;
+                 font-size: 0.95rem;
+            }
+            .payment-card {
+                width: calc(50% - 8px); /* Adjust width for smaller gap */
+                padding: 15px;
+            }
+             .payment-icon {
+                 font-size: 2rem;
+             }
+             .payment-card p {
+                 font-size: 0.85rem;
+             }
+            .control-card {
+                padding: 30px 20px;
+            }
+            .button-container {
+                gap: 15px;
+            }
+            .modal-content {
+                padding: 20px 15px;
+            }
+             .modal-content h2 {
+                 font-size: 1.4rem;
+             }
+             .payment-confirmation-content {
+                 padding: 25px 20px;
+             }
+             .payment-confirmation-content h2 {
+                 font-size: 1.5rem;
+             }
+             .payment-amount {
+                 font-size: 1.6rem;
+             }
+             .payment-confirmation-buttons {
+                 gap: 10px;
+             }
+        }
+
+    </style>
 </head>
-
 <body>
-  <h1>Kickbike Control</h1>
-  <p>Control the kickbike by sending START/STOP signals to Firebase.</p>
 
-  <!-- Buttons -->
-  <button id="startButton">Start</button>
-  <button id="stopButton">Stop</button>
+    <header id="mainHeader">
+        <div class="container header-container">
+            <a href="#" class="logo">
+                <i class="fas fa-bolt logo-icon"></i> <span>E-Kick</span>
+            </a>
+            <nav class="nav-links">
+                <a href="#hero" class="active">Home</a>
+                <a href="#howItWorks">How It Works</a>
+                <a href="#features">Features</a>
+                <a href="#payment">Pricing</a>
+                <a href="#routesSafety">Routes & Safety</a>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn btn-outline" id="loginBtnDesktop">Login</button>
+                <button class="btn btn-primary" id="signupBtnDesktop">Sign Up</button>
+                <div id="userProfileDesktop" style="display: none; align-items: center; gap: 15px;">
+                     <span id="userNameDesktop" style="font-weight: 500;"></span>
+                     <button class="btn btn-sm btn-danger" id="logoutBtnDesktop">Logout</button>
+                 </div>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu" aria-expanded="false">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
 
-  <script>
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyAPBxUbUF_d5VuDJoBCRuMtLIKIZp7yJwU",
-      authDomain: "e-kickbike.firebaseapp.com",
-      databaseURL: "https://e-kickbike-default-rtdb.firebaseio.com",
-      projectId: "e-kickbike",
-      storageBucket: "e-kickbike.firebasestorage.app",
-      messagingSenderId: "1001690866712",
-      appId: "1:1001690866712:web:213dff12eec8d41adf4f6d",
-      measurementId: "G-LD6T8FHX8F"
-    };
+    <div class="overlay" id="overlay"></div>
+    <nav class="mobile-nav" id="mobileNav">
+        <a href="#hero" class="nav-link-mobile">Home</a>
+        <a href="#howItWorks" class="nav-link-mobile">How It Works</a>
+        <a href="#features" class="nav-link-mobile">Features</a>
+        <a href="#payment" class="nav-link-mobile">Pricing</a>
+        <a href="#routesSafety" class="nav-link-mobile">Routes & Safety</a>
+        <div class="auth-buttons-mobile">
+            <button class="btn btn-outline" id="loginBtnMobile">Login</button>
+            <button class="btn btn-primary" id="signupBtnMobile">Sign Up</button>
+             <div id="userProfileMobile" style="display: none; text-align: center; margin-top: 20px;">
+                 <span id="userNameMobile" style="display: block; margin-bottom: 10px; font-weight: 500;"></span>
+                 <button class="btn btn-danger" id="logoutBtnMobile" style="width: 100%;">Logout</button>
+             </div>
+        </div>
+    </nav>
 
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const database = firebase.database(app);
+    <div class="main-content" id="mainContent">
 
-    // Start/Stop button functionality
-    document.getElementById('startButton').addEventListener('click', () => {
-      firebase.database().ref('kickbike/command').set(
-        { action: 'start' })
-        .then(() => {
-          alert('Kickbike started!');
-        })
-        .catch((error) => {
-          console.error('Error updating Firebase:', error);
-          alert('Failed to update Firebase.');
-        });
-    });
+        <section id="hero" class="hero">
+            <div class="container hero-content">
+                <h1>Ride the Future with E-Kick</h1>
+                <p>Your eco-friendly, fun, and convenient way to navigate the city. Unlock an e-kickbike and explore!</p>
+                <a href="#payment" class="btn btn-primary btn-lg">Get Started</a> </div>
+        </section>
 
-    document.getElementById('stopButton').addEventListener('click', () => {
-      firebase.database().ref('kickbike/command').set(
-        { action: 'Stop' })
-        .then(() => {
-          alert('Kickbike stopped!');
-        })
-        .catch((error) => {
-          console.error('Error updating Firebase:', error);
-          alert('Failed to update Firebase.');
-        });
-    });
-  </script>
+        <section id="howItWorks">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <div class="how-it-works-grid">
+                    <div class="step-card">
+                        <div class="step-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <h3>1. Locate</h3>
+                        <p>Find a nearby E-Kick bike using our app (or this website!).</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-icon"><i class="fas fa-qrcode"></i></div>
+                        <h3>2. Unlock</h3>
+                        <p>Scan the QR code on the kickbike to unlock it instantly.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-icon"><i class="fas fa-biking"></i></div> <h3>3. Ride</h3>
+                        <p>Enjoy your ride! Follow local traffic laws and ride safely.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-icon"><i class="fas fa-parking"></i></div>
+                        <h3>4. Park</h3>
+                        <p>Park responsibly in designated zones and end your ride via the app.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="payment" class="payment-section">
+            <div class="container">
+                <h2 class="section-title">Simple Pricing</h2>
+                <p style="text-align: center; max-width: 600px; margin: -40px auto 40px auto; color: #555;">
+                    Pay per ride or choose a pass. Start riding for just a small unlock fee plus per-minute charges.
+                </p>
+                <div class="payment-options">
+                    <div class="payment-card" data-method="Credit Card">
+                        <div class="payment-icon"><i class="fas fa-credit-card"></i></div>
+                        <p>Credit Card</p>
+                    </div>
+                    <div class="payment-card" data-method="PayPal">
+                        <div class="payment-icon"><i class="fab fa-paypal"></i></div>
+                        <p>PayPal</p>
+                    </div>
+                    <div class="payment-card" data-method="Google Pay">
+                        <div class="payment-icon"><i class="fab fa-google-pay"></i></div>
+                        <p>Google Pay</p>
+                    </div>
+                    <div class="payment-card" data-method="Apple Pay">
+                        <div class="payment-icon"><i class="fab fa-apple-pay"></i></div>
+                        <p>Apple Pay</p>
+                    </div>
+                </div>
+                 <p style="text-align: center; margin-top: 30px; font-size: 0.9rem; color: #666;">
+                    Select a payment method to confirm your ride.
+                </p>
+            </div>
+        </section>
+
+        <section id="rideControl" class="control-section">
+            <div class="container">
+                <div class="control-card">
+                    <h2>Your Ride is Active!</h2>
+                    <p>Enjoy your journey. Use the buttons below to manage your ride.</p>
+                    <div class="button-container">
+                        <button id="pauseRideBtn" class="btn btn-secondary">Pause Ride</button>
+                        <button id="endRideBtn" class="btn btn-danger">End Ride</button>
+                    </div>
+                    <div class="battery-status">
+                        <h3><i class="fas fa-battery-three-quarters"></i> Kickbike Battery</h3>
+                        <div class="battery-container">
+                            <div id="batteryLevel" class="battery-level"></div>
+                        </div>
+                        <p id="batteryPercentage">75%</p>
+                        <p id="estimatedTime">Estimated time left: 45 mins</p>
+                    </div>
+                     <div id="rideTimerDisplay" style="margin-top: 20px; font-size: 1.1rem; color: #444;">
+                         Ride Duration: <span id="timerMinutes">00</span>:<span id="timerSeconds">00</span>
+                     </div>
+                </div>
+            </div>
+        </section>
+
+         <section id="routesSafety">
+            <div class="container">
+                <h2 class="section-title">Explore & Ride Safe</h2>
+                <div class="routes-safety-container">
+                    <div class="routes-card">
+                        <h3><i class="fas fa-route"></i> Featured Local Routes</h3>
+                        <div class="route-item">
+                            <h4>City Waterfront Path</h4>
+                            <p>A scenic 5km ride along the river, perfect for a relaxing afternoon.</p>
+                        </div>
+                        <div class="route-item">
+                            <h4>Urban Art Loop</h4>
+                            <p>Discover vibrant street art in the downtown core on this 3km loop.</p>
+                        </div>
+                        <div class="route-item">
+                            <h4>Park Connector Trail</h4>
+                            <p>A longer 8km route connecting major city parks, great for exercise.</p>
+                        </div>
+                    </div>
+                    <div class="safety-card">
+                         <h3><i class="fas fa-shield-alt"></i> Safety First!</h3>
+                        <ul class="safety-tips-list">
+                            <li><i class="fas fa-check-circle"></i> Always wear a helmet for protection.</li>
+                            <li><i class="fas fa-check-circle"></i> Follow local traffic laws and signals.</li>
+                            <li><i class="fas fa-check-circle"></i> Be aware of pedestrians and vehicles.</li>
+                            <li><i class="fas fa-check-circle"></i> Use bike lanes when available.</li>
+                            <li><i class="fas fa-check-circle"></i> Check the kickbike's brakes before starting.</li>
+                            <li><i class="fas fa-check-circle"></i> Park responsibly, don't block pathways.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="features-section">
+            <div class="container">
+                <h2 class="section-title">Why Choose E-Kick?</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-leaf"></i></div>
+                        <h3>Eco-Friendly</h3>
+                        <p>Reduce your carbon footprint with zero-emission electric power.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-wallet"></i></div>
+                        <h3>Affordable</h3>
+                        <p>Cost-effective travel compared to taxis or ride-sharing.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-stopwatch"></i></div> <h3>Convenient</h3>
+                        <p>Find and unlock bikes easily, anytime you need a quick ride.</p>
+                    </div>
+                     <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-heartbeat"></i></div> <h3>Fun & Healthy</h3>
+                        <p>Enjoy the fresh air and get a little exercise while you commute.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div> <footer>
+        <div class="container footer-container">
+            <div class="footer-column">
+                <h3>E-Kick</h3>
+                <p style="color: #aaa; font-size: 0.9rem;">Your partner for sustainable urban mobility. Ride green, ride smart.</p>
+                 <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center; @media (min-width: 769px) { justify-content: flex-start; }">
+                     <a href="#" aria-label="Facebook" style="color: #aaa; font-size: 1.5rem; transition: color 0.3s ease;"><i class="fab fa-facebook-f"></i></a>
+                     <a href="#" aria-label="Twitter" style="color: #aaa; font-size: 1.5rem; transition: color 0.3s ease;"><i class="fab fa-twitter"></i></a>
+                     <a href="#" aria-label="Instagram" style="color: #aaa; font-size: 1.5rem; transition: color 0.3s ease;"><i class="fab fa-instagram"></i></a>
+                 </div>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="#hero"><i class="fas fa-angle-right"></i> Home</a></li>
+                    <li><a href="#howItWorks"><i class="fas fa-angle-right"></i> How It Works</a></li>
+                    <li><a href="#features"><i class="fas fa-angle-right"></i> Features</a></li>
+                    <li><a href="#payment"><i class="fas fa-angle-right"></i> Pricing</a></li>
+                    <li><a href="#routesSafety"><i class="fas fa-angle-right"></i> Routes & Safety</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Support</h3>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fas fa-question-circle"></i> FAQ</a></li>
+                    <li><a href="#"><i class="fas fa-user-shield"></i> Privacy Policy</a></li>
+                    <li><a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
+                    <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
+                </ul>
+            </div>
+             <div class="footer-column">
+                <h3>Contact</h3>
+                <ul class="footer-links">
+                    <li><a href="mailto:support@ekick.example.com"><i class="fas fa-envelope"></i> support@ekick.com</a></li>
+                    <li><a href="tel:+1234567890"><i class="fas fa-phone"></i> +1 234 567 890</a></li>
+                    <li><p style="color: #aaa; margin: 0; display: flex; align-items: flex-start; gap: 8px;"><i class="fas fa-map-marker-alt" style="margin-top: 4px;"></i> 123 Green St, Eco City</p></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; <span id="currentYear"></span> E-Kick Rental. All Rights Reserved.
+        </div>
+    </footer>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="close-modal" aria-label="Close login modal">&times;</button>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                 <p id="loginError" style="color: var(--danger-color); font-size: 0.9rem; margin-top: 15px; display: none;">Invalid credentials.</p>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <button type="button" class="btn btn-subtle close-modal-btn">Cancel</button>
+                </div>
+            </form>
+            <p style="margin-top: 20px; font-size: 0.9rem;">Don't have an account? <a href="#" id="switchToSignup" style="color: var(--primary-color); font-weight: 500;">Sign Up</a></p>
+        </div>
+    </div>
+
+    <div class="modal" id="signupModal">
+        <div class="modal-content">
+            <button class="close-modal" aria-label="Close signup modal">&times;</button>
+            <h2>Sign Up</h2>
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="signupName">Name</label>
+                    <input type="text" id="signupName" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" required>
+                </div>
+                 <p id="signupError" style="color: var(--danger-color); font-size: 0.9rem; margin-top: 15px; display: none;">Signup failed. Please try again.</p>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Sign Up</button>
+                     <button type="button" class="btn btn-subtle close-modal-btn">Cancel</button>
+                </div>
+            </form>
+             <p style="margin-top: 20px; font-size: 0.9rem;">Already have an account? <a href="#" id="switchToLogin" style="color: var(--primary-color); font-weight: 500;">Login</a></p>
+        </div>
+    </div>
+
+     <div id="paymentConfirmationView">
+        <div class="payment-confirmation-content">
+            <h2 id="paymentTitle">Confirm Your Ride</h2> <p>Review the details below and confirm payment to start.</p>
+            <p class="payment-method-display">Payment Method: <span id="paymentMethodSelected"></span></p>
+            <p>Service Charge:</p> <div class="payment-amount" id="paymentAmountDisplay">$1.00 Unlock Fee</div>
+            <div class="spinner" id="paymentSpinner"></div> <p id="paymentStatus"></p>
+            <div class="payment-confirmation-buttons">
+                 <button id="cancelPaymentBtn" class="btn btn-subtle">Cancel</button>
+                 <button id="payNowBtn" class="btn btn-primary">Pay Now</button>
+                 <button id="proceedToRideBtn" class="btn btn-primary" style="display: none;">Start Ride</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Get Element References ---
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileNav = document.getElementById('mobileNav');
+            const overlay = document.getElementById('overlay');
+            const mobileNavLinks = document.querySelectorAll('.nav-link-mobile');
+            const mainHeader = document.getElementById('mainHeader');
+            const mainContent = document.getElementById('mainContent');
+            const sections = document.querySelectorAll('section[id]');
+            const desktopNavLinks = document.querySelectorAll('.nav-links a');
+            const loginModal = document.getElementById('loginModal');
+            const signupModal = document.getElementById('signupModal');
+            const loginBtns = [document.getElementById('loginBtnDesktop'), document.getElementById('loginBtnMobile')];
+            const signupBtns = [document.getElementById('signupBtnDesktop'), document.getElementById('signupBtnMobile')];
+            const closeModalBtns = document.querySelectorAll('.close-modal, .close-modal-btn');
+            const switchToSignup = document.getElementById('switchToSignup');
+            const switchToLogin = document.getElementById('switchToLogin');
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            const loginError = document.getElementById('loginError');
+            const signupError = document.getElementById('signupError');
+            const userProfileDesktop = document.getElementById('userProfileDesktop');
+            const userProfileMobile = document.getElementById('userProfileMobile');
+            const userNameDesktop = document.getElementById('userNameDesktop');
+            const userNameMobile = document.getElementById('userNameMobile');
+            const logoutBtns = [document.getElementById('logoutBtnDesktop'), document.getElementById('logoutBtnMobile')];
+            const desktopAuthBtns = document.querySelector('header .auth-buttons');
+            const mobileAuthBtns = document.querySelector('.mobile-nav .auth-buttons-mobile');
+            const paymentCards = document.querySelectorAll('.payment-card');
+            const paymentConfirmationView = document.getElementById('paymentConfirmationView');
+            const paymentSpinner = document.getElementById('paymentSpinner');
+            const paymentStatus = document.getElementById('paymentStatus');
+            const cancelPaymentBtn = document.getElementById('cancelPaymentBtn');
+            const payNowBtn = document.getElementById('payNowBtn'); // New Pay Now button
+            const proceedToRideBtn = document.getElementById('proceedToRideBtn'); // Start Ride button
+            const paymentMethodSelected = document.getElementById('paymentMethodSelected');
+            const paymentAmountDisplay = document.getElementById('paymentAmountDisplay');
+            const paymentTitle = document.getElementById('paymentTitle');
+            const rideControlSection = document.getElementById('rideControl');
+            const paymentSection = document.getElementById('payment');
+            const pauseRideBtn = document.getElementById('pauseRideBtn');
+            const endRideBtn = document.getElementById('endRideBtn');
+            const batteryLevel = document.getElementById('batteryLevel');
+            const batteryPercentage = document.getElementById('batteryPercentage');
+            const estimatedTime = document.getElementById('estimatedTime');
+            const rideTimerDisplay = document.getElementById('rideTimerDisplay');
+            const timerMinutes = document.getElementById('timerMinutes');
+            const timerSeconds = document.getElementById('timerSeconds');
+
+            // --- State Variables ---
+            let paymentTimeout;
+            let batteryInterval;
+            let currentBattery = 75;
+            let rideTimerInterval;
+            let rideSeconds = 0;
+            let isPaused = false;
+            let isLoggedIn = false; // Still track login state for UI updates
+            let currentUserName = '';
+
+
+            // --- Mobile Menu ---
+            function toggleMobileMenu() {
+                const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+                mobileMenuBtn.setAttribute('aria-expanded', !isExpanded);
+                mobileNav.classList.toggle('active');
+                overlay.classList.toggle('active');
+                mainContent.classList.toggle('blurred');
+                mobileMenuBtn.innerHTML = !isExpanded ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+                document.body.style.overflow = !isExpanded ? 'hidden' : '';
+            }
+            mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+            overlay.addEventListener('click', toggleMobileMenu);
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (mobileNav.classList.contains('active')) toggleMobileMenu();
+                });
+            });
+
+            // --- Sticky Header Shadow ---
+            window.addEventListener('scroll', () => {
+                mainHeader.style.boxShadow = window.scrollY > 50 ? '0 2px 10px rgba(0, 0, 0, 0.1)' : 'var(--box-shadow)';
+            });
+
+            // --- Active Nav Link Highlighting ---
+            function highlightNavLink() {
+                let scrollY = window.pageYOffset;
+                let currentSectionId = '';
+                sections.forEach(current => {
+                    const sectionTop = current.offsetTop - mainHeader.offsetHeight - 50;
+                    if (scrollY >= sectionTop && scrollY < sectionTop + current.offsetHeight) {
+                        currentSectionId = current.getAttribute('id');
+                    }
+                });
+                if (!currentSectionId && scrollY < sections[0].offsetTop) currentSectionId = sections[0].getAttribute('id');
+                if (!currentSectionId && scrollY >= document.body.scrollHeight - window.innerHeight - 50) currentSectionId = sections[sections.length - 1].getAttribute('id');
+
+                desktopNavLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === `#${currentSectionId}`);
+                });
+                mobileNavLinks.forEach(link => {
+                    link.style.fontWeight = link.getAttribute('href') === `#${currentSectionId}` ? 'bold' : 'normal';
+                });
+            }
+            window.addEventListener('scroll', highlightNavLink);
+            highlightNavLink();
+
+            // --- Modal Handling ---
+            function openModal(modal) {
+                modal.classList.add('active');
+                mainContent.classList.add('blurred');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeModal(modal) {
+                modal.classList.remove('active');
+                if (!loginModal.classList.contains('active') && !signupModal.classList.contains('active') && !paymentConfirmationView.classList.contains('active')) { // Check payment view too
+                    mainContent.classList.remove('blurred');
+                    document.body.style.overflow = '';
+                }
+            }
+            loginBtns.forEach(btn => btn.addEventListener('click', () => openModal(loginModal)));
+            signupBtns.forEach(btn => btn.addEventListener('click', () => openModal(signupModal)));
+            closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    closeModal(loginModal);
+                    closeModal(signupModal);
+                });
+            });
+            switchToSignup.addEventListener('click', (e) => { e.preventDefault(); closeModal(loginModal); openModal(signupModal); });
+            switchToLogin.addEventListener('click', (e) => { e.preventDefault(); closeModal(signupModal); openModal(loginModal); });
+            [loginModal, signupModal].forEach(modal => {
+                modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); });
+            });
+
+            // --- Mock Authentication UI Update ---
+            function updateAuthStateUI(loggedIn, name = '') {
+                 isLoggedIn = loggedIn; // Keep track of state
+                 currentUserName = name;
+                 userNameDesktop.textContent = `Hi, ${name}!`;
+                 userNameMobile.textContent = `Hi, ${name}!`;
+                 userProfileDesktop.style.display = loggedIn ? 'flex' : 'none';
+                 userProfileMobile.style.display = loggedIn ? 'block' : 'none';
+                 loginBtns.forEach(btn => btn.style.display = loggedIn ? 'none' : 'inline-block');
+                 signupBtns.forEach(btn => btn.style.display = loggedIn ? 'none' : 'inline-block');
+                 loginError.style.display = 'none';
+                 signupError.style.display = 'none';
+            }
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                if (email) {
+                     updateAuthStateUI(true, email.split('@')[0]);
+                     closeModal(loginModal);
+                     loginForm.reset();
+                } else {
+                    loginError.style.display = 'block';
+                }
+            });
+            signupForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('signupName').value;
+                if (name) {
+                     updateAuthStateUI(true, name);
+                     closeModal(signupModal);
+                     signupForm.reset();
+                } else {
+                     signupError.style.display = 'block';
+                }
+            });
+            logoutBtns.forEach(btn => {
+                 btn.addEventListener('click', () => {
+                     updateAuthStateUI(false);
+                     if (mobileNav.classList.contains('active')) toggleMobileMenu();
+                 });
+            });
+
+            // --- UPDATED Payment Flow ---
+            paymentCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    // REMOVED login check here
+
+                    const method = card.dataset.method;
+                    paymentMethodSelected.textContent = method;
+                    paymentAmountDisplay.textContent = "$1.00 Unlock Fee"; // Set amount
+                    paymentTitle.textContent = "Confirm Your Ride"; // Initial title
+                    paymentStatus.textContent = ''; // Clear status
+                    paymentStatus.className = ''; // Clear status classes
+                    paymentSpinner.style.display = 'none'; // Ensure spinner is hidden initially
+                    payNowBtn.style.display = 'inline-block'; // Show Pay Now button
+                    cancelPaymentBtn.style.display = 'inline-block'; // Show Cancel button
+                    proceedToRideBtn.style.display = 'none'; // Ensure Start Ride button is hidden
+
+                    // Show the payment confirmation view
+                    paymentConfirmationView.classList.add('active');
+                    mainContent.classList.add('blurred'); // Blur background
+                    document.body.style.overflow = 'hidden'; // Prevent background scroll
+                });
+            });
+
+            // Listener for the NEW Pay Now button
+            payNowBtn.addEventListener('click', () => {
+                paymentTitle.textContent = "Processing Payment..."; // Update title
+                paymentSpinner.style.display = 'block'; // Show spinner
+                payNowBtn.style.display = 'none'; // Hide Pay Now button
+                cancelPaymentBtn.style.display = 'none'; // Hide Cancel button during processing
+                paymentStatus.textContent = ''; // Clear status
+                paymentStatus.className = '';
+
+                // Simulate payment processing
+                clearTimeout(paymentTimeout);
+                paymentTimeout = setTimeout(() => {
+                    paymentSpinner.style.display = 'none'; // Hide spinner
+                    const isSuccess = Math.random() > 0.2; // 80% success rate
+
+                    if (isSuccess) {
+                        paymentTitle.textContent = "Payment Successful!";
+                        paymentStatus.textContent = 'Your ride is ready.';
+                        paymentStatus.className = 'success';
+                        proceedToRideBtn.style.display = 'inline-block'; // Show Start Ride button
+                        cancelPaymentBtn.style.display = 'none'; // Keep cancel hidden on success
+                    } else {
+                        paymentTitle.textContent = "Payment Failed";
+                        paymentStatus.textContent = 'Please try again or cancel.';
+                        paymentStatus.className = 'error';
+                        payNowBtn.style.display = 'inline-block'; // Show Pay Now again on failure
+                        cancelPaymentBtn.style.display = 'inline-block'; // Show Cancel button again on failure
+                    }
+                }, 2500); // Simulate 2.5 seconds
+            });
+
+            // Close payment view function
+            function closePaymentView() {
+                 clearTimeout(paymentTimeout);
+                 paymentConfirmationView.classList.remove('active');
+                 // Only remove blur if no other modal is active
+                 if (!loginModal.classList.contains('active') && !signupModal.classList.contains('active')) {
+                     mainContent.classList.remove('blurred');
+                     document.body.style.overflow = '';
+                 }
+            }
+
+            // Attach close function to Cancel button and overlay click
+            cancelPaymentBtn.addEventListener('click', closePaymentView);
+            paymentConfirmationView.addEventListener('click', (e) => {
+                 if (e.target === paymentConfirmationView) { // Click on backdrop
+                     // Only close if payment isn't processing (spinner not visible)
+                     if (paymentSpinner.style.display === 'none') {
+                         closePaymentView();
+                     }
+                 }
+            });
+
+
+            // Listener for the Start Ride button (after successful payment)
+            proceedToRideBtn.addEventListener('click', () => {
+                closePaymentView();
+                paymentSection.style.display = 'none';
+                rideControlSection.style.display = 'block';
+                rideControlSection.scrollIntoView({ behavior: 'smooth' });
+                startRideTimer();
+                simulateBatteryDrain();
+            });
+
+            // --- Ride Control Simulation ---
+            function formatTime(totalSeconds) {
+                 const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+                 const seconds = String(totalSeconds % 60).padStart(2, '0');
+                 return { minutes, seconds };
+            }
+            function startRideTimer() {
+                 clearInterval(rideTimerInterval);
+                 rideSeconds = 0;
+                 isPaused = false;
+                 pauseRideBtn.textContent = 'Pause Ride';
+                 pauseRideBtn.className = 'btn btn-secondary'; // Reset class
+                 rideTimerInterval = setInterval(() => {
+                     if (!isPaused) {
+                         rideSeconds++;
+                         const time = formatTime(rideSeconds);
+                         timerMinutes.textContent = time.minutes;
+                         timerSeconds.textContent = time.seconds;
+                     }
+                 }, 1000);
+            }
+            function stopRideTimer() { clearInterval(rideTimerInterval); }
+            function updateBatteryDisplay() {
+                const percentage = Math.max(0, Math.min(100, Math.round(currentBattery)));
+                batteryLevel.style.width = `${percentage}%`;
+                batteryPercentage.textContent = `${percentage}%`;
+                const minutesLeft = Math.round(currentBattery); // Simple 1%=1min estimate
+                estimatedTime.textContent = `Estimated time left: ${minutesLeft} mins`;
+                if (percentage > 50) batteryLevel.style.backgroundColor = 'var(--primary-color)';
+                else if (percentage > 20) batteryLevel.style.backgroundColor = 'var(--accent-color)';
+                else batteryLevel.style.backgroundColor = 'var(--danger-color)';
+                batteryLevel.classList.toggle('full', percentage === 100);
+            }
+            function simulateBatteryDrain() {
+                clearInterval(batteryInterval);
+                currentBattery = 75; // Reset battery
+                updateBatteryDisplay();
+                batteryInterval = setInterval(() => {
+                     if (!isPaused && currentBattery > 0) {
+                         currentBattery -= 0.2; // Drain rate
+                         updateBatteryDisplay();
+                     }
+                     if (currentBattery <= 0) {
+                         clearInterval(batteryInterval);
+                         estimatedTime.textContent = 'Battery depleted!';
+                     }
+                }, 5000); // Update interval
+            }
+             pauseRideBtn.addEventListener('click', () => {
+                 isPaused = !isPaused;
+                 pauseRideBtn.textContent = isPaused ? 'Resume Ride' : 'Pause Ride';
+                 pauseRideBtn.className = isPaused ? 'btn btn-success' : 'btn btn-secondary';
+             });
+            endRideBtn.addEventListener('click', () => {
+                clearInterval(batteryInterval);
+                stopRideTimer();
+                const finalTime = formatTime(rideSeconds);
+                const cost = (1 + (rideSeconds / 60) * 0.15).toFixed(2);
+                // Use a more robust notification system in a real app
+                alert(`Ride Ended!\nDuration: ${finalTime.minutes}:${finalTime.seconds}\nEstimated Cost: $${cost}`);
+                rideControlSection.style.display = 'none';
+                paymentSection.style.display = 'block';
+                paymentSection.scrollIntoView({ behavior: 'smooth' });
+            });
+
+            // --- Footer Year ---
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        }); // End DOMContentLoaded
+    </script>
+
 </body>
-
 </html>
