@@ -1,1627 +1,601 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Kickbike Rental - Eco-Friendly Urban Mobility</title>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js" defer></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js" defer></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* Base styles */
-        :root {
-            --primary-color: #00A651; /* Green */
-            --secondary-color: #0066CC; /* Blue */
-            --accent-color: #FF6B35; /* Orange */
-            --light-color: #FFFFFF;
-            --dark-color: #333333;
-            --grey-color: #F5F5F5;
-            --light-grey-color: #e9ecef;
-            --border-color: #ddd;
-            --danger-color: #ff3b30;
-            --success-color: #34c759; /* iOS Green */
-            --border-radius: 8px;
-            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>Fluid Motion Booking v8 - Kickbike</title>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        <style>
+            /* --- Global Styles & Resets --- */
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-        html {
-            scroll-behavior: smooth; /* Smooth scrolling for anchor links */
-            font-size: 16px; /* Base font size */
-        }
+            :root {
+                /* Color Palette */
+                --color-bg: #1a1a1a;
+                --color-primary: #00FFFF; /* Electric Blue/Cyan */
+                --color-secondary: #39FF14; /* Neon Green */
+                --color-accent: #FF00FF; /* Vibrant Magenta */
+                --color-text: #e0e0e0;
+                --color-text-muted: #888888;
+                --color-panel-bg: #2a2a2a;
+                --color-panel-bg-translucent: rgba(42, 42, 42, 0.9);
+                --color-border: #444444;
+                --color-success: #39FF14;
+                --color-warning: #FFA500;
+                --color-error: #FF4136;
 
-        body {
-            font-family: 'Poppins', Arial, sans-serif;
-            color: var(--dark-color);
-            background-color: var(--light-color);
-            overflow-x: hidden; /* Prevent horizontal scroll */
-            line-height: 1.6;
-        }
+                /* Typography */
+                --font-primary: 'Inter', sans-serif;
 
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
+                /* Transitions */
+                --transition-fast: 0.2s ease-out;
+                --transition-medium: 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                --transition-slow: 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55);
 
-        /* Header styles */
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: var(--light-color);
-            box-shadow: var(--box-shadow);
-            z-index: 1000;
-            padding: 15px 0;
-            transition: var(--transition);
-        }
-
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens if needed */
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            font-size: clamp(1.3rem, 4vw, 1.5rem); /* Responsive font size */
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .logo-icon {
-            animation: pulse 2s infinite;
-            font-size: 1.8rem;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        /* Desktop Navigation */
-        .nav-links {
-            display: flex;
-            gap: 30px;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--dark-color);
-            font-weight: 500;
-            position: relative;
-            padding-bottom: 5px;
-            transition: var(--transition);
-        }
-
-        .nav-links a:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background-color: var(--primary-color);
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--primary-color);
-        }
-
-        .nav-links a:hover:after,
-        .nav-links a.active:after {
-            width: 100%;
-        }
-
-        .auth-buttons {
-            display: flex;
-            gap: 15px;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 10px 20px;
-            border-radius: var(--border-radius);
-            border: none;
-            font-weight: 500;
-            cursor: pointer;
-            font-family: 'Poppins', Arial, sans-serif;
-            transition: var(--transition);
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-            font-size: 0.95rem; /* Slightly smaller base button size */
-        }
-        .btn-lg { /* Larger button variant */
-             padding: 12px 25px;
-             font-size: 1rem;
-        }
-        .btn-sm { /* Smaller button variant */
-            padding: 6px 12px;
-            font-size: 0.9rem;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: var(--light-color);
-        }
-        .btn-primary:hover {
-            background-color: #008c44;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-secondary {
-            background-color: var(--secondary-color);
-            color: var(--light-color);
-        }
-        .btn-secondary:hover {
-            background-color: #0055aa;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-danger {
-            background-color: var(--danger-color);
-            color: var(--light-color);
-        }
-        .btn-danger:hover {
-            background-color: #e6352b;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            border: 2px solid var(--primary-color);
-            color: var(--primary-color);
-        }
-        .btn-outline:hover {
-            background-color: var(--primary-color);
-            color: var(--light-color);
-            transform: translateY(-2px);
-        }
-        .btn-subtle { /* New subtle button style */
-             background-color: var(--light-grey-color);
-             color: var(--dark-color);
-             border: 1px solid var(--border-color);
-        }
-        .btn-subtle:hover {
-             background-color: #dcdcdc;
-             border-color: #c5c5c5;
-        }
-
-
-        /* Mobile Menu Button */
-        .mobile-menu-btn {
-            display: none; /* Hidden by default */
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: var(--dark-color);
-            cursor: pointer;
-            z-index: 1100;
-        }
-
-        /* Mobile Navigation Menu */
-        .mobile-nav {
-            display: none; /* Hidden by default */
-            position: fixed;
-            top: 0;
-            right: -100%; /* Start off-screen */
-            width: 70%;
-            max-width: 300px;
-            height: 100vh;
-            background-color: var(--light-color);
-            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-            flex-direction: column;
-            align-items: center;
-            padding-top: 80px; /* Space for header */
-            z-index: 1050;
-            transition: right 0.4s ease-in-out;
-        }
-        .mobile-nav.active {
-            right: 0; /* Slide in */
-            display: flex;
-        }
-        .mobile-nav a {
-            text-decoration: none;
-            color: var(--dark-color);
-            font-size: 1.2rem;
-            padding: 15px 0;
-            width: 80%;
-            text-align: center;
-            border-bottom: 1px solid var(--grey-color);
-            transition: background-color 0.2s ease;
-        }
-        .mobile-nav a:hover {
-            background-color: var(--grey-color);
-            color: var(--primary-color);
-        }
-        .mobile-nav .auth-buttons-mobile {
-            margin-top: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 80%;
-        }
-        .mobile-nav .auth-buttons-mobile .btn {
-            width: 100%;
-        }
-
-        /* Mobile Menu Overlay */
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1040; /* Below mobile nav, above content */
-            opacity: 0;
-            transition: opacity 0.4s ease-in-out;
-        }
-        .overlay.active {
-            display: block;
-            opacity: 1;
-        }
-
-        /* Main Content Area */
-        .main-content {
-            transition: filter 0.4s ease; /* Transition for blur effect */
-        }
-        .main-content.blurred {
-             filter: blur(5px); /* Blur background when modal/overlay is active */
-             pointer-events: none; /* Prevent interaction with blurred content */
-        }
-
-        /* Hero section */
-        .hero {
-            padding-top: 140px; /* Adjusted padding top for fixed header */
-            padding-bottom: 80px; /* Increased padding bottom */
-            background: linear-gradient(135deg, #eef9f2 0%, #d9f0e3 100%); /* Lighter green gradient */
-            min-height: 60vh;
-            display: flex;
-            align-items: center;
-        }
-        .hero-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .hero h1 {
-            font-size: clamp(2rem, 6vw, 3.2rem);
-            margin-bottom: 20px;
-            color: var(--dark-color);
-            font-weight: 700;
-        }
-        .hero p {
-            font-size: clamp(1rem, 3vw, 1.2rem);
-            margin-bottom: 35px;
-            color: #444;
-            max-width: 600px;
-        }
-
-        /* Section Styles */
-        section {
-            padding: 80px 0; /* Increased default section padding */
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 60px; /* Increased margin */
-            font-size: clamp(1.8rem, 5vw, 2.5rem);
-            color: var(--dark-color);
-            font-weight: 600;
-            position: relative;
-        }
-        .section-title:after {
-            content: '';
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 4px;
-            background-color: var(--primary-color);
-            border-radius: 2px;
-        }
-
-        /* How It Works Section */
-        #howItWorks {
-            background-color: var(--light-color);
-        }
-        .how-it-works-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-        .step-card {
-            background-color: var(--light-color);
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 30px 25px;
-            text-align: center;
-            border-top: 4px solid var(--primary-color);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .step-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-        }
-        .step-icon {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            line-height: 1;
-        }
-        .step-card h3 {
-            margin-bottom: 15px;
-            font-size: 1.3rem;
-            color: var(--dark-color);
-        }
-        .step-card p {
-            color: #555;
-            font-size: 0.95rem;
-        }
-
-        /* Payment section */
-        #payment {
-            background-color: var(--grey-color);
-        }
-        .payment-options {
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            flex-wrap: wrap;
-            margin-top: 40px;
-        }
-        .payment-card {
-            background-color: var(--light-color);
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 25px;
-            width: 160px;
-            text-align: center;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: var(--transition);
-        }
-        .payment-card:hover {
-            border-color: var(--primary-color);
-            transform: scale(1.05) translateY(-5px);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-        }
-        .payment-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            color: var(--secondary-color);
-            transition: color 0.3s ease;
-        }
-        .payment-card:hover .payment-icon {
-            color: var(--primary-color);
-        }
-        .payment-card p {
-            font-weight: 500;
-            color: var(--dark-color);
-            font-size: 0.9rem; /* Slightly smaller text */
-        }
-
-        /* Ride Control section */
-        #rideControl {
-            background-color: var(--light-grey-color); /* Changed background */
-            display: none; /* Initially hidden */
-        }
-        .control-card {
-            background-color: var(--light-color);
-            border-radius: var(--border-radius);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            text-align: center;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        .control-card h2 {
-            margin-bottom: 20px;
-            color: var(--dark-color);
-            font-size: 1.8rem;
-        }
-        .control-card p {
-            margin-bottom: 30px;
-            color: #555;
-        }
-        .button-container {
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            flex-wrap: wrap; /* Allow buttons to wrap on small screens */
-        }
-        .button-container .btn {
-            padding: 12px 25px;
-            font-size: 1rem;
-        }
-
-        /* Battery status */
-        .battery-status {
-            margin-top: 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .battery-status h3 {
-            margin-bottom: 15px;
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-        .battery-container {
-            width: 220px;
-            height: 35px;
-            border: 2px solid #ccc;
-            border-radius: 18px;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 15px;
-            background-color: var(--light-grey-color);
-        }
-        .battery-level {
-            height: 100%;
-            background-color: var(--primary-color);
-            width: 75%; /* Default value, updated by JS */
-            border-radius: 16px 0 0 16px; /* Round only left side initially */
-            transition: width 1s ease, background-color 0.5s ease;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-        .battery-level.full { /* Style for full battery */
-            border-radius: 16px;
-        }
-        #batteryPercentage, #estimatedTime {
-            font-size: 0.95rem;
-            color: #555;
-            margin-bottom: 5px;
-        }
-
-        /* NEW: Featured Routes & Safety Tips Section */
-        #routesSafety {
-            background-color: var(--light-color);
-        }
-        .routes-safety-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 40px;
-            margin-top: 40px;
-        }
-        .routes-card, .safety-card {
-            background-color: var(--light-color);
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 30px;
-            border-left: 5px solid var(--primary-color); /* Accent border */
-        }
-         .routes-card h3, .safety-card h3 {
-             margin-bottom: 20px;
-             font-size: 1.5rem;
-             color: var(--dark-color);
-             display: flex;
-             align-items: center;
-             gap: 10px;
-         }
-         .routes-card h3 i, .safety-card h3 i {
-             color: var(--primary-color);
-         }
-
-         .route-item {
-             margin-bottom: 15px;
-             padding-bottom: 15px;
-             border-bottom: 1px solid var(--light-grey-color);
-         }
-         .route-item:last-child {
-             margin-bottom: 0;
-             padding-bottom: 0;
-             border-bottom: none;
-         }
-         .route-item h4 {
-             margin-bottom: 5px;
-             font-size: 1.1rem;
-             font-weight: 600;
-         }
-         .route-item p {
-             font-size: 0.95rem;
-             color: #555;
-         }
-         .safety-tips-list {
-             list-style: none;
-             padding-left: 0;
-         }
-         .safety-tips-list li {
-             margin-bottom: 12px;
-             display: flex;
-             align-items: flex-start; /* Align icon with text start */
-             gap: 10px;
-             font-size: 0.95rem;
-             color: #555;
-         }
-         .safety-tips-list i {
-             color: var(--success-color); /* Green check for safety */
-             margin-top: 4px; /* Align icon slightly lower */
-             flex-shrink: 0; /* Prevent icon from shrinking */
-         }
-
-
-        /* Features section */
-        #features {
-            background-color: var(--grey-color);
-        }
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 35px;
-            margin-top: 40px;
-        }
-        .feature-card {
-            background-color: var(--light-color);
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 35px 30px;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-bottom-color 0.3s ease;
-            border-bottom: 4px solid transparent;
-        }
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            border-bottom-color: var(--primary-color);
-        }
-        .feature-icon {
-            font-size: 3.5rem;
-            color: var(--primary-color);
-            margin-bottom: 25px;
-        }
-        .feature-card h3 {
-            margin-bottom: 15px;
-            color: var(--dark-color);
-            font-size: 1.4rem;
-        }
-        .feature-card p {
-            color: #555;
-            font-size: 1rem;
-        }
-
-        /* Footer */
-        footer {
-            background-color: var(--dark-color);
-            color: #ccc;
-            padding: 60px 0 30px;
-        }
-        .footer-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-        .footer-column h3 {
-            margin-bottom: 25px;
-            font-size: 1.3rem;
-            color: var(--light-color);
-            font-weight: 600;
-        }
-        .footer-links {
-            list-style: none;
-        }
-        .footer-links li {
-            margin-bottom: 12px;
-        }
-        .footer-links a {
-            color: #aaa;
-            text-decoration: none;
-            transition: var(--transition);
-            display: inline-flex; /* Align icon and text */
-            align-items: center;
-            gap: 8px;
-        }
-        .footer-links a:hover {
-            color: var(--light-color);
-            padding-left: 5px;
-        }
-        .footer-links i {
-            width: 16px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-        .footer-bottom {
-            text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid #444;
-            font-size: 0.9rem;
-            color: #aaa;
-        }
-
-        /* Modal Styles (Login/Signup) */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            opacity: 0; /* Start hidden for transition */
-            transition: opacity 0.3s ease;
-            /* backdrop-filter: blur(5px); /* Optional: Add blur effect */
-        }
-        .modal.active {
-             display: flex;
-             opacity: 1;
-        }
-
-        .modal-content {
-            background-color: var(--light-color);
-            border-radius: var(--border-radius);
-            padding: 30px 40px;
-            max-width: 450px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            transform: scale(0.95); /* Start slightly smaller */
-            transition: transform 0.3s ease;
-            text-align: center;
-        }
-        .modal.active .modal-content {
-             transform: scale(1); /* Scale to full size */
-        }
-
-        .modal-content h2 {
-            margin-bottom: 25px;
-            color: var(--dark-color);
-            font-size: 1.6rem;
-        }
-        .modal-content p {
-            margin-bottom: 25px;
-            color: #555;
-            font-size: 1.1rem;
-        }
-        .modal-content .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        .modal-content label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #444;
-        }
-        .modal-content input[type="email"],
-        .modal-content input[type="password"] {
-            width: 100%;
-            padding: 12px 15px;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--border-color);
-            font-size: 1rem;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        .modal-content input:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0, 166, 81, 0.2); /* Focus ring */
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 1.8rem;
-            font-weight: bold;
-            cursor: pointer;
-            color: #999;
-            transition: color 0.2s ease;
-            line-height: 1;
-            background: none; /* Ensure it's a button */
-            border: none;
-            padding: 5px; /* Add padding for easier clicking */
-        }
-        .close-modal:hover {
-            color: var(--dark-color);
-        }
-
-        .modal-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 25px;
-            flex-wrap: wrap; /* Allow buttons to wrap */
-        }
-        .modal-buttons .btn {
-            padding: 12px 25px;
-        }
-
-        /* UPDATED: Payment Confirmation View Styles */
-        #paymentConfirmationView {
-            display: none; /* Hidden by default */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(245, 245, 245, 0.98); /* Slightly off-white overlay */
-            z-index: 1500; /* Above main content, below modals */
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-        #paymentConfirmationView.active {
-            display: flex; /* Use flex for centering */
-            opacity: 1;
-        }
-        .payment-confirmation-content {
-            background-color: var(--light-color);
-            padding: 40px 50px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            max-width: 500px;
-            width: 90%;
-        }
-        .payment-confirmation-content h2 {
-            margin-bottom: 20px;
-            color: var(--dark-color);
-            font-size: 1.7rem;
-        }
-        .payment-confirmation-content p {
-            margin-bottom: 15px;
-            color: #555;
-            font-size: 1.1rem;
-        }
-        .payment-amount {
-            font-size: 2rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin: 20px 0;
-        }
-        .payment-method-display {
-            font-style: italic;
-            color: #666;
-            margin-bottom: 30px;
-        }
-        .spinner { /* Simple CSS Spinner */
-            border: 4px solid var(--light-grey-color);
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-            display: none; /* Hidden initially */
-        }
-        #paymentStatus {
-            margin-top: 20px;
-            font-weight: 500;
-            min-height: 24px; /* Reserve space */
-        }
-        #paymentStatus.success {
-            color: var(--success-color);
-        }
-        #paymentStatus.error {
-            color: var(--danger-color);
-        }
-        .payment-confirmation-buttons {
-            margin-top: 30px;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        /* Ensure Pay Now button is styled well */
-        #payNowBtn {
-             min-width: 120px; /* Give it some minimum width */
-        }
-
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 992px) {
-            .container {
-                max-width: 960px;
+                /* Expanding Dock Navigation */
+                --dock-height: 60px;
+                /* Adjusted collapsed width to comfortably fit ~3 icons */
+                --dock-collapsed-width: 150px;
+                --dock-expanded-width: 95%;
+                --dock-max-expanded-width: 700px;
+                --dock-item-size: 45px;
             }
-            .nav-links {
-                gap: 20px; /* Reduce gap */
-            }
-            .footer-container {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 30px;
-            }
-        }
 
-        @media (max-width: 768px) {
-            html {
-                font-size: 15px; /* Slightly smaller base font on tablets */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
+                touch-action: manipulation;
             }
-            .nav-links, .auth-buttons {
-                display: none; /* Hide desktop nav and auth buttons */
-            }
-            .mobile-menu-btn {
-                display: block; /* Show mobile menu button */
-            }
-            .header-container {
-                padding: 0 15px; /* Ensure padding consistency */
-            }
-            .hero {
-                padding-top: 120px; /* Adjust hero padding */
-                min-height: 50vh;
-            }
-            section {
-                padding: 60px 0; /* Reduce section padding */
-            }
-            .section-title {
-                margin-bottom: 40px;
-            }
-            .how-it-works-grid, .features-grid, .routes-safety-container {
-                grid-template-columns: 1fr; /* Stack cards */
-                gap: 25px;
-            }
-            .payment-options {
-                gap: 15px;
-            }
-            .payment-card {
-                width: calc(50% - 10px); /* Two cards per row */
-                padding: 20px;
-            }
-            .footer-container {
-                grid-template-columns: 1fr; /* Stack footer columns */
-                text-align: center;
-            }
-            .footer-links {
-                padding-left: 0;
-                display: inline-block; /* Center links */
-                text-align: left;
-            }
-            .modal-content {
-                padding: 25px 20px;
-            }
-            .payment-confirmation-content {
-                 padding: 30px 25px;
-            }
-            .payment-amount {
-                 font-size: 1.8rem;
-            }
-        }
 
-        @media (max-width: 480px) {
-            html {
-                font-size: 14px; /* Smaller base font on small mobiles */
+            html { font-size: 16px; }
+
+            body {
+                font-family: var(--font-primary);
+                background-color: var(--color-bg);
+                color: var(--color-text);
+                overflow: hidden;
+                position: fixed;
+                height: 100%;
+                width: 100%;
             }
-            .logo {
-                font-size: 1.2rem; /* Smaller logo */
+
+            button {
+                font-family: inherit;
+                cursor: pointer;
+                border: none;
+                background: none;
+                color: inherit;
+                padding: 10px 20px;
+                border-radius: 8px;
+                transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
             }
-            .logo-icon {
-                font-size: 1.6rem;
+             button:active { transform: scale(0.97); }
+
+            /* --- Animated Background --- */
+            body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(45deg, rgba(0, 255, 255, 0.05), rgba(57, 255, 20, 0.03), rgba(255, 0, 255, 0.05)); background-size: 400% 400%; animation: gradientBG 25s ease infinite; z-index: -1; }
+            @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+            /* --- Screen Management & Transitions --- */
+            .screen {
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                display: flex; flex-direction: column; align-items: center;
+                padding: 20px; padding-bottom: calc(var(--dock-height) + 30px); /* Space for dock */
+                z-index: 10; opacity: 0; visibility: hidden;
+                transform: translateX(100%) scale(0.95);
+                transition: opacity var(--transition-medium), visibility var(--transition-medium), transform var(--transition-medium);
+                background-color: var(--color-bg); overflow-y: auto; -webkit-overflow-scrolling: touch;
             }
-            .hero h1 {
-                font-size: 1.8rem; /* Smaller hero heading */
+            .screen.is-active { opacity: 1; visibility: visible; transform: translateX(0) scale(1); z-index: 20; }
+            .screen.is-exiting { opacity: 0; transform: translateX(-100%) scale(0.95); z-index: 15; transition: opacity var(--transition-medium), transform var(--transition-medium); }
+            #landing-screen { transform: translateX(0) scale(1); z-index: 30; justify-content: center; }
+            #landing-screen.is-exiting { opacity: 0; transform: translateX(-100%) scale(0.95); z-index: 15; }
+
+            /* --- Expanding Bottom Dock Navigation --- */
+            #bottom-dock {
+                position: fixed; bottom: 15px; left: 50%;
+                transform: translateX(-50%);
+                height: var(--dock-height);
+                width: var(--dock-collapsed-width);
+                max-width: 90%;
+                background-color: var(--color-panel-bg-translucent);
+                backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+                border: 1px solid var(--color-border);
+                border-radius: 30px;
+                z-index: 1100;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+                display: flex;
+                /* Center items horizontally in both states initially */
+                justify-content: center;
+                align-items: center;
+                padding: 0 10px;
+                transition: width var(--transition-medium), max-width var(--transition-medium), border-radius var(--transition-medium), justify-content var(--transition-medium);
+                overflow: hidden;
             }
-            .hero p {
-                font-size: 0.95rem; /* Smaller hero text */
+
+            #bottom-dock.is-expanded {
+                width: var(--dock-expanded-width);
+                max-width: var(--dock-max-expanded-width);
+                border-radius: 15px;
+                justify-content: space-around; /* Space out when expanded */
             }
-            .btn {
-                 padding: 8px 16px; /* Smaller buttons */
-                 font-size: 0.9rem;
+
+            .dock-item {
+                display: flex; flex-direction: column; align-items: center; justify-content: center;
+                height: 100%; padding: 5px; background: none; border: none;
+                color: var(--color-text-muted);
+                flex-shrink: 0; flex-grow: 0;
+                position: relative; overflow: hidden;
+                transition: color var(--transition-fast), transform var(--transition-fast), opacity var(--transition-medium), width var(--transition-medium);
+                opacity: 1; transform: scale(0.9);
+                width: var(--dock-item-size); /* Give initial width for spacing */
             }
-            .btn-lg {
-                 padding: 10px 20px;
-                 font-size: 0.95rem;
-            }
-            .payment-card {
-                width: calc(50% - 8px); /* Adjust width for smaller gap */
-                padding: 15px;
-            }
-             .payment-icon {
-                 font-size: 2rem;
+             /* Expand item width slightly when dock expands */
+             #bottom-dock.is-expanded .dock-item {
+                  transform: scale(1);
+                  flex-grow: 1; /* Allow spacing */
+                  width: auto; /* Let flexbox handle width */
              }
-             .payment-card p {
-                 font-size: 0.85rem;
-             }
-            .control-card {
-                padding: 30px 20px;
+
+            .dock-item svg {
+                width: 28px; /* Slightly larger icons */
+                height: 28px;
+                /* Use stroke for line icons */
+                stroke: currentColor;
+                stroke-width: 1.5; /* Adjust stroke width */
+                fill: none; /* Ensure no fill for line icons */
+                margin-bottom: 2px;
+                transition: transform var(--transition-fast);
             }
-            .button-container {
-                gap: 15px;
+             /* Style for filled icons if needed */
+             .dock-item svg.filled-icon {
+                  fill: currentColor;
+                  stroke: none;
+             }
+
+
+            .dock-item span {
+                font-size: 10px; font-weight: 600; white-space: nowrap;
+                opacity: 0; /* Hidden initially */
+                transform: translateY(5px);
+                transition: opacity 0.2s ease-out 0.1s, transform 0.2s ease-out 0.1s;
             }
-            .modal-content {
-                padding: 20px 15px;
+
+            #bottom-dock.is-expanded .dock-item span {
+                opacity: 1; transform: translateY(0);
             }
-             .modal-content h2 {
-                 font-size: 1.4rem;
-             }
-             .payment-confirmation-content {
-                 padding: 25px 20px;
-             }
-             .payment-confirmation-content h2 {
-                 font-size: 1.5rem;
-             }
-             .payment-amount {
-                 font-size: 1.6rem;
-             }
-             .payment-confirmation-buttons {
-                 gap: 10px;
-             }
-        }
 
-    </style>
-</head>
-<body>
+            /* Hide labels and non-essential icons in collapsed state */
+            #bottom-dock:not(.is-expanded) .dock-item span {
+                 display: none; /* Completely remove label space */
+            }
+            /* Example: Hide items starting from the 4th one when collapsed */
+            #bottom-dock:not(.is-expanded) .dock-item:nth-child(n+4) {
+                 opacity: 0;
+                 width: 0;
+                 padding: 0;
+                 pointer-events: none;
+                 overflow: hidden;
+            }
 
-    <header id="mainHeader">
-        <div class="container header-container">
-            <a href="#" class="logo">
-                <i class="fas fa-bolt logo-icon"></i> <span>E-Kick</span>
-            </a>
-            <nav class="nav-links">
-                <a href="#hero" class="active">Home</a>
-                <a href="#howItWorks">How It Works</a>
-                <a href="#features">Features</a>
-                <a href="#payment">Pricing</a>
-                <a href="#routesSafety">Routes & Safety</a>
-            </nav>
-            <div class="auth-buttons">
-                <button class="btn btn-outline" id="loginBtnDesktop">Login</button>
-                <button class="btn btn-primary" id="signupBtnDesktop">Sign Up</button>
-                <div id="userProfileDesktop" style="display: none; align-items: center; gap: 15px;">
-                     <span id="userNameDesktop" style="font-weight: 500;"></span>
-                     <button class="btn btn-sm btn-danger" id="logoutBtnDesktop">Logout</button>
-                 </div>
-            </div>
-            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu" aria-expanded="false">
-                <i class="fas fa-bars"></i>
-            </button>
-        </div>
-    </header>
 
-    <div class="overlay" id="overlay"></div>
-    <nav class="mobile-nav" id="mobileNav">
-        <a href="#hero" class="nav-link-mobile">Home</a>
-        <a href="#howItWorks" class="nav-link-mobile">How It Works</a>
-        <a href="#features" class="nav-link-mobile">Features</a>
-        <a href="#payment" class="nav-link-mobile">Pricing</a>
-        <a href="#routesSafety" class="nav-link-mobile">Routes & Safety</a>
-        <div class="auth-buttons-mobile">
-            <button class="btn btn-outline" id="loginBtnMobile">Login</button>
-            <button class="btn btn-primary" id="signupBtnMobile">Sign Up</button>
-             <div id="userProfileMobile" style="display: none; text-align: center; margin-top: 20px;">
-                 <span id="userNameMobile" style="display: block; margin-bottom: 10px; font-weight: 500;"></span>
-                 <button class="btn btn-danger" id="logoutBtnMobile" style="width: 100%;">Logout</button>
-             </div>
-        </div>
-    </nav>
+            .dock-item:hover { color: var(--color-text); }
+            .dock-item:active svg { transform: scale(0.9); }
+            .dock-item.is-active { color: var(--color-primary); }
 
-    <div class="main-content" id="mainContent">
+            /* Ripple Animation on Click */
+            .ripple {
+                position: absolute; border-radius: 50%;
+                background-color: rgba(0, 255, 255, 0.5);
+                transform: scale(0);
+                animation: ripple-effect 0.6s linear;
+                pointer-events: none;
+            }
+            @keyframes ripple-effect { to { transform: scale(4); opacity: 0; } }
 
-        <section id="hero" class="hero">
-            <div class="container hero-content">
-                <h1>Ride the Future with E-Kick</h1>
-                <p>Your eco-friendly, fun, and convenient way to navigate the city. Unlock an e-kickbike and explore!</p>
-                <a href="#payment" class="btn btn-primary btn-lg">Get Started</a> </div>
-        </section>
+            /* --- Back Button --- */
+            #back-button {
+                position: fixed; top: 20px; left: 20px; z-index: 1150;
+                background-color: var(--color-panel-bg-translucent); backdrop-filter: blur(5px);
+                border: 1px solid var(--color-border); border-radius: 50%;
+                width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+                padding: 0; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                opacity: 0; visibility: hidden; transform: scale(0.8);
+                transition: opacity var(--transition-medium), visibility var(--transition-medium), transform var(--transition-medium);
+            }
+            #back-button.is-visible { opacity: 1; visibility: visible; transform: scale(1); }
+            #back-button svg { width: 22px; height: 22px; stroke: var(--color-primary); }
+            #back-button:hover { background-color: rgba(42, 42, 42, 1); }
 
-        <section id="howItWorks">
-            <div class="container">
-                <h2 class="section-title">How It Works</h2>
-                <div class="how-it-works-grid">
-                    <div class="step-card">
-                        <div class="step-icon"><i class="fas fa-map-marker-alt"></i></div>
-                        <h3>1. Locate</h3>
-                        <p>Find a nearby E-Kick bike using our app (or this website!).</p>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-icon"><i class="fas fa-qrcode"></i></div>
-                        <h3>2. Unlock</h3>
-                        <p>Scan the QR code on the kickbike to unlock it instantly.</p>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-icon"><i class="fas fa-biking"></i></div> <h3>3. Ride</h3>
-                        <p>Enjoy your ride! Follow local traffic laws and ride safely.</p>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-icon"><i class="fas fa-parking"></i></div>
-                        <h3>4. Park</h3>
-                        <p>Park responsibly in designated zones and end your ride via the app.</p>
-                    </div>
+            /* --- Landing Screen --- */
+            #landing-screen { text-align: center; justify-content: center; }
+            .landing-content { max-width: 400px; }
+            #kickbike-animation { width: 150px; height: 150px; margin: 0 auto 40px auto; }
+            #kickbike-animation svg { width: 100%; height: 100%; filter: drop-shadow(0 0 10px var(--color-primary)); animation: float 4s ease-in-out infinite; }
+            @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+            .tagline { font-size: 1.8rem; font-weight: 700; color: var(--color-text); margin-bottom: 15px; line-height: 1.3; }
+            .subtitle { font-size: 1rem; color: var(--color-text-muted); margin-bottom: 40px; }
+            .cta-button { background: linear-gradient(45deg, var(--color-primary), var(--color-secondary)); color: var(--color-bg); font-size: 1.1rem; font-weight: 600; padding: 15px 35px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3); }
+            .cta-button:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 255, 255, 0.4); }
+
+            /* --- Bike List Screen --- */
+            #bike-list-screen { justify-content: flex-start; padding-top: 30px; }
+            .section-title { font-size: 1.6rem; font-weight: 700; color: var(--color-primary); margin-bottom: 25px; text-align: center; width: 100%; }
+            #bike-list { width: 100%; max-width: 600px; list-style: none; padding: 0; margin: 0; overflow-y: auto; max-height: calc(100% - 80px); }
+            .bike-list-item { background-color: var(--color-panel-bg); border: 1px solid var(--color-border); border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; transition: transform var(--transition-fast), box-shadow var(--transition-fast); }
+            .bike-list-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
+            .bike-info { flex-grow: 1; margin-right: 15px; }
+            .bike-info h3 { font-size: 1.1rem; font-weight: 600; color: var(--color-text); margin-bottom: 5px; }
+            .bike-info p { font-size: 0.85rem; color: var(--color-text-muted); display: flex; align-items: center; }
+            .bike-info p svg { width: 14px; height: 14px; margin-right: 6px; flex-shrink: 0; }
+            .bike-actions button { background-color: var(--color-secondary); color: var(--color-bg); font-size: 0.9rem; font-weight: 600; padding: 8px 15px; }
+            .bike-actions button:hover { background-color: #2aff00; }
+
+            /* --- Static Content Screens --- */
+            .content-screen { justify-content: flex-start; align-items: flex-start; text-align: left; }
+            .content-wrapper { width: 100%; max-width: 800px; margin: 0 auto; padding-top: 0; }
+            .content-wrapper h1 { font-size: 2rem; font-weight: 700; color: var(--color-primary); margin-bottom: 20px; border-bottom: 1px solid var(--color-border); padding-bottom: 10px; }
+            .content-wrapper h2 { font-size: 1.4rem; font-weight: 600; color: var(--color-secondary); margin-top: 30px; margin-bottom: 15px; }
+            .content-wrapper p, .content-wrapper li { font-size: 1rem; line-height: 1.7; color: var(--color-text-muted); margin-bottom: 15px; }
+            .content-wrapper ul { list-style: disc; margin-left: 25px; margin-bottom: 15px; }
+            .content-wrapper a { color: var(--color-primary); text-decoration: none; transition: color var(--transition-fast); }
+            .content-wrapper a:hover { color: var(--color-secondary); text-decoration: underline; }
+            #feedback-form label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+            #feedback-form input[type="email"], #feedback-form textarea { width: 100%; padding: 10px; background-color: var(--color-bg); border: 1px solid var(--color-border); border-radius: 5px; color: var(--color-text); margin-bottom: 15px; font-family: inherit; }
+            #feedback-form textarea { min-height: 100px; resize: vertical; }
+            #feedback-form button { background-color: var(--color-primary); color: var(--color-bg); font-weight: 600; }
+
+            /* --- Modals --- */
+            .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1200; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity var(--transition-medium), visibility var(--transition-medium); }
+            .modal-overlay.is-visible { opacity: 1; visibility: visible; }
+            .modal-content { background-color: var(--color-panel-bg); padding: 25px; border-radius: 12px; width: 90%; max-width: 450px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4); border: 1px solid var(--color-border); transform: scale(0.9); transition: transform var(--transition-medium); position: relative; }
+            .modal-overlay.is-visible .modal-content { transform: scale(1); }
+            .modal-close-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; padding: 5px; width: 30px; height: 30px; cursor: pointer; }
+            .modal-close-btn svg { width: 100%; height: 100%; stroke: var(--color-text-muted); transition: stroke var(--transition-fast); }
+            .modal-close-btn:hover svg { stroke: var(--color-text); }
+            .modal-content h2 { font-size: 1.4rem; color: var(--color-primary); margin-bottom: 15px; text-align: center; }
+            .modal-content p { font-size: 0.95rem; color: var(--color-text-muted); margin-bottom: 10px; line-height: 1.5; }
+            .modal-content .bike-details { background-color: var(--color-bg); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--color-border); }
+            .modal-content .bike-details p { margin-bottom: 5px; font-size: 0.9rem; color: var(--color-text); }
+            .modal-content .bike-details strong { color: var(--color-primary); }
+            .modal-actions { display: flex; justify-content: center; margin-top: 25px; }
+            .modal-actions button { background-color: var(--color-secondary); color: var(--color-bg); font-weight: 600; }
+            #payment-confirm-modal .payment-amount { font-size: 1.8rem; font-weight: 700; color: var(--color-secondary); text-align: center; margin: 15px 0; }
+            #payment-confirm-modal .payment-note { font-size: 0.8rem; text-align: center; color: var(--color-text-muted); }
+            .confirmation-animation { width: 80px; height: 80px; margin: 20px auto; }
+            .confirmation-animation svg { width: 100%; height: 100%; }
+            .checkmark__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 3; stroke-miterlimit: 10; stroke: var(--color-success); fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
+            .checkmark__check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; stroke-width: 3; stroke: var(--color-success); fill: none; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards; }
+            @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+            #active-ride-content .timer { font-size: 2.5rem; font-weight: 700; color: var(--color-secondary); margin: 15px 0; }
+            #active-ride-content .distance { font-size: 1.2rem; color: var(--color-primary); margin-bottom: 25px; }
+            #active-ride-content .end-ride-btn { background-color: var(--color-error); color: white; font-weight: 600; }
+            #ride-summary-content .summary-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
+            #ride-summary-content .summary-item:last-child { border-bottom: none; }
+            #ride-summary-content .summary-item span:first-child { color: var(--color-text-muted); }
+            #ride-summary-content .summary-item span:last-child { font-weight: 600; color: var(--color-primary); }
+            #ride-summary-content .summary-item.cost span:last-child { color: var(--color-secondary); }
+
+            /* --- Loader --- */
+            .loader-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity var(--transition-fast), visibility var(--transition-fast); }
+            .loader-overlay.is-visible { opacity: 1; visibility: visible; }
+            .loader { width: 50px; height: 50px; border: 5px solid var(--color-border); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 1s linear infinite; }
+            @keyframes spin { to { transform: rotate(360deg); } }
+
+            /* --- Responsive Design --- */
+            @media (min-width: 768px) {
+                html { font-size: 17px; }
+                .screen { padding: 40px; padding-bottom: calc(var(--dock-height) + 30px); padding-top: 40px; }
+                .landing-content { max-width: 600px; }
+                #kickbike-animation { width: 200px; height: 200px; }
+                .tagline { font-size: 2.5rem; }
+                .subtitle { font-size: 1.1rem; }
+                .modal-content { padding: 35px; }
+                .content-wrapper { padding-top: 0; }
+                .content-wrapper h1 { font-size: 2.5rem; }
+                 :root { --dock-height: 65px; }
+                 .dock-item svg { max-width: 28px; max-height: 28px; margin-bottom: 4px;}
+                 .dock-item span { font-size: 11px; }
+                 #back-button { width: 45px; height: 45px; top: 25px; left: 25px; }
+            }
+
+            @media (min-width: 1024px) {
+                html { font-size: 18px; }
+                .screen { padding: 60px; padding-bottom: calc(var(--dock-height) + 40px); padding-top: 60px; }
+                .landing-content { max-width: 700px; }
+                #kickbike-animation { width: 250px; height: 250px; }
+                .tagline { font-size: 3rem; }
+                .content-wrapper h1 { font-size: 2.8rem; }
+                 :root { --dock-height: 70px; }
+            }
+            /* Hide scrollbar visually */
+             .screen::-webkit-scrollbar { display: none; }
+             .screen { -ms-overflow-style: none; scrollbar-width: none; }
+
+        </style>
+    </head>
+    <body>
+
+        <div id="landing-screen" class="screen is-active">
+            <div class="landing-content">
+                <div id="kickbike-animation">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5"> <path d="M14 40 L10 40 Q8 40 8 42 L8 52 Q8 54 10 54 L14 54 Q16 54 16 52 L16 42 Q16 40 14 40 Z" stroke="var(--color-primary)" /> <path d="M54 40 L50 40 Q48 40 48 42 L48 52 Q48 54 50 54 L54 54 Q56 54 56 52 L56 42 Q56 40 54 40 Z" stroke="var(--color-primary)" /> <line x1="16" y1="48" x2="48" y2="48" stroke="var(--color-text)" /> <line x1="32" y1="48" x2="48" y2="20" stroke="var(--color-text)" /> <line x1="44" y1="18" x2="54" y2="14" stroke="var(--color-text)" /> <circle cx="52" cy="15" r="3" fill="var(--color-secondary)" stroke="none"/> </svg>
                 </div>
-            </div>
-        </section>
-
-        <section id="payment" class="payment-section">
-            <div class="container">
-                <h2 class="section-title">Simple Pricing</h2>
-                <p style="text-align: center; max-width: 600px; margin: -40px auto 40px auto; color: #555;">
-                    Pay per ride or choose a pass. Start riding for just a small unlock fee plus per-minute charges.
-                </p>
-                <div class="payment-options">
-                    <div class="payment-card" data-method="Credit Card">
-                        <div class="payment-icon"><i class="fas fa-credit-card"></i></div>
-                        <p>Credit Card</p>
-                    </div>
-                    <div class="payment-card" data-method="PayPal">
-                        <div class="payment-icon"><i class="fab fa-paypal"></i></div>
-                        <p>PayPal</p>
-                    </div>
-                    <div class="payment-card" data-method="Google Pay">
-                        <div class="payment-icon"><i class="fab fa-google-pay"></i></div>
-                        <p>Google Pay</p>
-                    </div>
-                    <div class="payment-card" data-method="Apple Pay">
-                        <div class="payment-icon"><i class="fab fa-apple-pay"></i></div>
-                        <p>Apple Pay</p>
-                    </div>
-                </div>
-                 <p style="text-align: center; margin-top: 30px; font-size: 0.9rem; color: #666;">
-                    Select a payment method to confirm your ride.
-                </p>
-            </div>
-        </section>
-
-        <section id="rideControl" class="control-section">
-            <div class="container">
-                <div class="control-card">
-                    <h2>Your Ride is Active!</h2>
-                    <p>Enjoy your journey. Use the buttons below to manage your ride.</p>
-                    <div class="button-container">
-                        <button id="pauseRideBtn" class="btn btn-secondary">Pause Ride</button>
-                        <button id="endRideBtn" class="btn btn-danger">End Ride</button>
-                    </div>
-                    <div class="battery-status">
-                        <h3><i class="fas fa-battery-three-quarters"></i> Kickbike Battery</h3>
-                        <div class="battery-container">
-                            <div id="batteryLevel" class="battery-level"></div>
-                        </div>
-                        <p id="batteryPercentage">75%</p>
-                        <p id="estimatedTime">Estimated time left: 45 mins</p>
-                    </div>
-                     <div id="rideTimerDisplay" style="margin-top: 20px; font-size: 1.1rem; color: #444;">
-                         Ride Duration: <span id="timerMinutes">00</span>:<span id="timerSeconds">00</span>
-                     </div>
-                </div>
-            </div>
-        </section>
-
-         <section id="routesSafety">
-            <div class="container">
-                <h2 class="section-title">Explore & Ride Safe</h2>
-                <div class="routes-safety-container">
-                    <div class="routes-card">
-                        <h3><i class="fas fa-route"></i> Featured Local Routes</h3>
-                        <div class="route-item">
-                            <h4>City Waterfront Path</h4>
-                            <p>A scenic 5km ride along the river, perfect for a relaxing afternoon.</p>
-                        </div>
-                        <div class="route-item">
-                            <h4>Urban Art Loop</h4>
-                            <p>Discover vibrant street art in the downtown core on this 3km loop.</p>
-                        </div>
-                        <div class="route-item">
-                            <h4>Park Connector Trail</h4>
-                            <p>A longer 8km route connecting major city parks, great for exercise.</p>
-                        </div>
-                    </div>
-                    <div class="safety-card">
-                         <h3><i class="fas fa-shield-alt"></i> Safety First!</h3>
-                        <ul class="safety-tips-list">
-                            <li><i class="fas fa-check-circle"></i> Always wear a helmet for protection.</li>
-                            <li><i class="fas fa-check-circle"></i> Follow local traffic laws and signals.</li>
-                            <li><i class="fas fa-check-circle"></i> Be aware of pedestrians and vehicles.</li>
-                            <li><i class="fas fa-check-circle"></i> Use bike lanes when available.</li>
-                            <li><i class="fas fa-check-circle"></i> Check the kickbike's brakes before starting.</li>
-                            <li><i class="fas fa-check-circle"></i> Park responsibly, don't block pathways.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="features" class="features-section">
-            <div class="container">
-                <h2 class="section-title">Why Choose E-Kick?</h2>
-                <div class="features-grid">
-                    <div class="feature-card">
-                        <div class="feature-icon"><i class="fas fa-leaf"></i></div>
-                        <h3>Eco-Friendly</h3>
-                        <p>Reduce your carbon footprint with zero-emission electric power.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon"><i class="fas fa-wallet"></i></div>
-                        <h3>Affordable</h3>
-                        <p>Cost-effective travel compared to taxis or ride-sharing.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon"><i class="fas fa-stopwatch"></i></div> <h3>Convenient</h3>
-                        <p>Find and unlock bikes easily, anytime you need a quick ride.</p>
-                    </div>
-                     <div class="feature-card">
-                        <div class="feature-icon"><i class="fas fa-heartbeat"></i></div> <h3>Fun & Healthy</h3>
-                        <p>Enjoy the fresh air and get a little exercise while you commute.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </div> <footer>
-        <div class="container footer-container">
-            <div class="footer-column">
-                <h3>E-Kick</h3>
-                <p style="color: #aaa; font-size: 0.9rem;">Your partner for sustainable urban mobility. Ride green, ride smart.</p>
-                 <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center; @media (min-width: 769px) { justify-content: flex-start; }">
-                     <a href="#" aria-label="Facebook" style="color: #aaa; font-size: 1.5rem; transition: color 0.3s ease;"><i class="fab fa-facebook-f"></i></a>
-                     <a href="#" aria-label="Twitter" style="color: #aaa; font-size: 1.5rem; transition: color 0.3s ease;"><i class="fab fa-twitter"></i></a>
-                     <a href="#" aria-label="Instagram" style="color: #aaa; font-size: 1.5rem; transition: color 0.3s ease;"><i class="fab fa-instagram"></i></a>
-                 </div>
-            </div>
-            <div class="footer-column">
-                <h3>Quick Links</h3>
-                <ul class="footer-links">
-                    <li><a href="#hero"><i class="fas fa-angle-right"></i> Home</a></li>
-                    <li><a href="#howItWorks"><i class="fas fa-angle-right"></i> How It Works</a></li>
-                    <li><a href="#features"><i class="fas fa-angle-right"></i> Features</a></li>
-                    <li><a href="#payment"><i class="fas fa-angle-right"></i> Pricing</a></li>
-                    <li><a href="#routesSafety"><i class="fas fa-angle-right"></i> Routes & Safety</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h3>Support</h3>
-                <ul class="footer-links">
-                    <li><a href="#"><i class="fas fa-question-circle"></i> FAQ</a></li>
-                    <li><a href="#"><i class="fas fa-user-shield"></i> Privacy Policy</a></li>
-                    <li><a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
-                    <li><a href="#"><i class="fas fa-envelope"></i> Contact Us</a></li>
-                </ul>
-            </div>
-             <div class="footer-column">
-                <h3>Contact</h3>
-                <ul class="footer-links">
-                    <li><a href="mailto:support@ekick.example.com"><i class="fas fa-envelope"></i> support@ekick.com</a></li>
-                    <li><a href="tel:+1234567890"><i class="fas fa-phone"></i> +1 234 567 890</a></li>
-                    <li><p style="color: #aaa; margin: 0; display: flex; align-items: flex-start; gap: 8px;"><i class="fas fa-map-marker-alt" style="margin-top: 4px;"></i> 123 Green St, Eco City</p></li>
-                </ul>
+                <h1 class="tagline">Unlock Your City Flow</h1>
+                <p class="subtitle">The smoothest way to navigate your urban playground.</p>
+                <button id="find-ride-btn" class="cta-button" data-target-screen="bike-list-screen">Find a Ride</button>
             </div>
         </div>
-        <div class="footer-bottom">
-            &copy; <span id="currentYear"></span> E-Kick Rental. All Rights Reserved.
+
+        <div id="bike-list-screen" class="screen">
+            <h1 class="section-title">Available Rides</h1>
+            <ul id="bike-list">
+                <li>Loading bikes...</li>
+            </ul>
         </div>
-    </footer>
 
-    <div class="modal" id="loginModal">
-        <div class="modal-content">
-            <button class="close-modal" aria-label="Close login modal">&times;</button>
-            <h2>Login</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" required>
-                </div>
-                <div class="form-group">
-                    <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" required>
-                </div>
-                 <p id="loginError" style="color: var(--danger-color); font-size: 0.9rem; margin-top: 15px; display: none;">Invalid credentials.</p>
-                <div class="modal-buttons">
-                    <button type="submit" class="btn btn-primary">Login</button>
-                    <button type="button" class="btn btn-subtle close-modal-btn">Cancel</button>
-                </div>
-            </form>
-            <p style="margin-top: 20px; font-size: 0.9rem;">Don't have an account? <a href="#" id="switchToSignup" style="color: var(--primary-color); font-weight: 500;">Sign Up</a></p>
-        </div>
-    </div>
+        <div id="about-screen" class="screen content-screen"> <div class="content-wrapper"> <h1>About Us</h1> <p>We believe urban mobility should be fluid, sustainable, and fun. Our mission is to provide easily accessible electric kickbikes to help you navigate your city with ease.</p> <h2>Our Story</h2> <p>Founded in 2023 by city dwellers frustrated with traffic, Fluid Motion started with a simple idea: make getting around town effortless. We deployed our first fleet in San Francisco and have been growing ever since.</p> <h2>Our Values</h2> <ul> <li>**Sustainability:** Committed to eco-friendly transportation.</li> <li>**Accessibility:** Making mobility easy and affordable.</li> <li>**Innovation:** Constantly improving our tech and user experience.</li> <li>**Community:** Engaging locally to enhance urban life.</li> </ul> </div> </div>
+        <div id="what-we-do-screen" class="screen content-screen"> <div class="content-wrapper"> <h1>What We Do</h1> <p>Fluid Motion provides a seamless electric kickbike sharing service for modern urban life.</p> <h2>Electric Kickbike Rentals</h2> <p>Find and unlock our high-quality kickbikes through this web prototype (simulating the core app flow!). Ride as needed, paying per minute (simulated).</p> <h2>Technology Platform</h2> <p>Our platform handles bike location, user management, booking, and payments (all simulated here).</p> <h2>City Partnerships</h2> <p>We collaborate with cities for responsible deployment and safe riding.</p> </div> </div>
+        <div id="how-to-use-screen" class="screen content-screen"> <div class="content-wrapper"> <h1>How To Use</h1> <div id="info-content" style="white-space: normal;"> <div class="info-card" style="display: block; width: auto; margin-bottom: 20px; background: var(--color-panel-bg); border-radius: 8px; padding: 15px; text-align: center;"> <svg style="width: 40px; height: 40px; margin: 0 auto 10px auto; stroke: var(--color-primary);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"> <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /> </svg> <h4>1. Find a Bike</h4> <p>Tap 'Bikes' in the bottom dock to see available kickbikes.</p> </div> <div class="info-card" style="display: block; width: auto; margin-bottom: 20px; background: var(--color-panel-bg); border-radius: 8px; padding: 15px; text-align: center;"> <svg style="width: 40px; height: 40px; margin: 0 auto 10px auto; stroke: var(--color-primary);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"> <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" /> </svg> <h4>2. Book & Pay</h4> <p>Select 'Book'. Confirm the initial charge, then tap 'Pay & Unlock'.</p> </div> <div class="info-card" style="display: block; width: auto; margin-bottom: 20px; background: var(--color-panel-bg); border-radius: 8px; padding: 15px; text-align: center;"> <svg style="width: 40px; height: 40px; margin: 0 auto 10px auto; stroke: var(--color-primary);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"> <path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" /> </svg> <h4>3. Ride Safely</h4> <p>Kick off gently. Wear a helmet, obey traffic laws, be aware.</p> </div> <div class="info-card" style="display: block; width: auto; margin-bottom: 20px; background: var(--color-panel-bg); border-radius: 8px; padding: 15px; text-align: center;"> <svg style="width: 40px; height: 40px; margin: 0 auto 10px auto; stroke: var(--color-primary);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"> <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 10.5a2.25 2.25 0 0 0-2.25 2.25v7.5a2.25 2.25 0 0 0 2.25 2.25h16.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25H3.75Z" /> </svg> <h4>4. Park & End Ride</h4> <p>Park upright in a designated zone. Tap 'End Ride' in the active ride modal.</p> </div> </div> </div> </div>
+        <div id="careers-screen" class="screen content-screen"> <div class="content-wrapper"> <h1>Careers</h1> <p>Join the fluid motion revolution! We seek passionate individuals for urban mobility tech.</p> <h2>Current Openings</h2> <p>No specific openings listed now, but send your resume and cover letter to:</p> <p><a href="mailto:careers@fluidmotion.example">careers@fluidmotion.example</a></p> <h2>Why Work With Us?</h2> <ul> <li>Fast-growing, innovative company.</li> <li>Impact city transportation.</li> <li>Collaborative environment.</li> <li>Competitive benefits (placeholder).</li> </ul> </div> </div>
+        <div id="contact-screen" class="screen content-screen"> <div class="content-wrapper"> <h1>Contact Us</h1> <p>Questions or feedback? We'd love to hear from you!</p> <h2>Support</h2> <p>Ride/app issues: <a href="mailto:support@fluidmotion.example">support@fluidmotion.example</a></p> <h2>General Inquiries</h2> <p>Partnerships/general questions: <a href="mailto:hello@fluidmotion.example">hello@fluidmotion.example</a></p> <h2>Address (Dummy)</h2> <p>Fluid Motion HQ<br>123 Innovation Drive<br>San Francisco, CA 94107</p> </div> </div>
+        <div id="feedback-screen" class="screen content-screen"> <div class="content-wrapper"> <h1>Feedback</h1> <p>Help us improve! Share your experience or suggestions.</p> <form id="feedback-form"> <div> <label for="feedback-email">Your Email (Optional):</label> <input type="email" id="feedback-email" name="email"> </div> <div> <label for="feedback-message">Message:</label> <textarea id="feedback-message" name="message" required></textarea> </div> <button type="submit">Send Feedback</button> </form> <p id="feedback-thanks" style="color: var(--color-success); margin-top: 15px; display: none;">Thank you for your feedback!</p> </div> </div>
 
-    <div class="modal" id="signupModal">
-        <div class="modal-content">
-            <button class="close-modal" aria-label="Close signup modal">&times;</button>
-            <h2>Sign Up</h2>
-            <form id="signupForm">
-                <div class="form-group">
-                    <label for="signupName">Name</label>
-                    <input type="text" id="signupName" required>
-                </div>
-                <div class="form-group">
-                    <label for="signupEmail">Email</label>
-                    <input type="email" id="signupEmail" required>
-                </div>
-                <div class="form-group">
-                    <label for="signupPassword">Password</label>
-                    <input type="password" id="signupPassword" required>
-                </div>
-                 <p id="signupError" style="color: var(--danger-color); font-size: 0.9rem; margin-top: 15px; display: none;">Signup failed. Please try again.</p>
-                <div class="modal-buttons">
-                    <button type="submit" class="btn btn-primary">Sign Up</button>
-                     <button type="button" class="btn btn-subtle close-modal-btn">Cancel</button>
-                </div>
-            </form>
-             <p style="margin-top: 20px; font-size: 0.9rem;">Already have an account? <a href="#" id="switchToLogin" style="color: var(--primary-color); font-weight: 500;">Login</a></p>
-        </div>
-    </div>
+        <nav id="bottom-dock">
+             </nav>
 
-     <div id="paymentConfirmationView">
-        <div class="payment-confirmation-content">
-            <h2 id="paymentTitle">Confirm Your Ride</h2> <p>Review the details below and confirm payment to start.</p>
-            <p class="payment-method-display">Payment Method: <span id="paymentMethodSelected"></span></p>
-            <p>Service Charge:</p> <div class="payment-amount" id="paymentAmountDisplay">$1.00 Unlock Fee</div>
-            <div class="spinner" id="paymentSpinner"></div> <p id="paymentStatus"></p>
-            <div class="payment-confirmation-buttons">
-                 <button id="cancelPaymentBtn" class="btn btn-subtle">Cancel</button>
-                 <button id="payNowBtn" class="btn btn-primary">Pay Now</button>
-                 <button id="proceedToRideBtn" class="btn btn-primary" style="display: none;">Start Ride</button>
-            </div>
-        </div>
-    </div>
+        <button id="back-button" title="Go Back">
+             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /> </svg>
+        </button>
 
+        <div id="payment-confirm-modal" class="modal-overlay"> <div class="modal-content"> <button class="modal-close-btn" data-modal-id="payment-confirm-modal" title="Close"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /> </svg> </button> <h2>Confirm Payment</h2> <div class="bike-details"> <p>Bike ID: <strong id="payment-bike-id">---</strong></p> </div> <p>Initial booking charge:</p> <div class="payment-amount" id="payment-amount">₹--.--</div> <p class="payment-note">(Further charges apply per minute of riding)</p> <div class="modal-actions"> <button id="confirm-payment-btn">Pay & Unlock</button> </div> </div> </div>
+        <div id="booking-success-modal" class="modal-overlay"> <div class="modal-content" style="text-align: center;"> <h2>Unlocked!</h2> <div class="confirmation-animation"> <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"> <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/> <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/> </svg> </div> <p>Your ride is starting now.</p> </div> </div>
+        <div id="active-ride-modal" class="modal-overlay"> <div class="modal-content" id="active-ride-content" style="text-align: center;"> <h2>Ride in Progress</h2> <p>Bike ID: <strong id="ride-bike-id">---</strong></p> <div class="timer" id="ride-timer">00:00</div> <div class="distance" id="ride-distance">0.0 km</div> <button id="end-ride-btn" class="end-ride-btn">End Ride</button> </div> </div>
+        <div id="ride-summary-modal" class="modal-overlay"> <div class="modal-content" id="ride-summary-content"> <button class="modal-close-btn" data-modal-id="ride-summary-modal" title="Close"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /> </svg> </button> <h2>Ride Summary</h2> <div class="summary-item"> <span>Duration:</span> <span id="summary-duration">--:--</span> </div> <div class="summary-item"> <span>Distance:</span> <span id="summary-distance">--.- km</span> </div> <div class="summary-item cost"> <span>Estimated Cost:</span> <span id="summary-cost">₹--.--</span> </div> <p style="text-align:center; margin-top: 20px; font-size: 0.9rem; color: var(--color-text-muted);">Thank you for riding!</p> <div class="modal-actions"> <button class="modal-close-btn" data-modal-id="ride-summary-modal" style="position: static; width: auto; background-color: var(--color-primary); color: var(--color-bg);">Done</button> </div> </div> </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Get Element References ---
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const mobileNav = document.getElementById('mobileNav');
-            const overlay = document.getElementById('overlay');
-            const mobileNavLinks = document.querySelectorAll('.nav-link-mobile');
-            const mainHeader = document.getElementById('mainHeader');
-            const mainContent = document.getElementById('mainContent');
-            const sections = document.querySelectorAll('section[id]');
-            const desktopNavLinks = document.querySelectorAll('.nav-links a');
-            const loginModal = document.getElementById('loginModal');
-            const signupModal = document.getElementById('signupModal');
-            const loginBtns = [document.getElementById('loginBtnDesktop'), document.getElementById('loginBtnMobile')];
-            const signupBtns = [document.getElementById('signupBtnDesktop'), document.getElementById('signupBtnMobile')];
-            const closeModalBtns = document.querySelectorAll('.close-modal, .close-modal-btn');
-            const switchToSignup = document.getElementById('switchToSignup');
-            const switchToLogin = document.getElementById('switchToLogin');
-            const loginForm = document.getElementById('loginForm');
-            const signupForm = document.getElementById('signupForm');
-            const loginError = document.getElementById('loginError');
-            const signupError = document.getElementById('signupError');
-            const userProfileDesktop = document.getElementById('userProfileDesktop');
-            const userProfileMobile = document.getElementById('userProfileMobile');
-            const userNameDesktop = document.getElementById('userNameDesktop');
-            const userNameMobile = document.getElementById('userNameMobile');
-            const logoutBtns = [document.getElementById('logoutBtnDesktop'), document.getElementById('logoutBtnMobile')];
-            const desktopAuthBtns = document.querySelector('header .auth-buttons');
-            const mobileAuthBtns = document.querySelector('.mobile-nav .auth-buttons-mobile');
-            const paymentCards = document.querySelectorAll('.payment-card');
-            const paymentConfirmationView = document.getElementById('paymentConfirmationView');
-            const paymentSpinner = document.getElementById('paymentSpinner');
-            const paymentStatus = document.getElementById('paymentStatus');
-            const cancelPaymentBtn = document.getElementById('cancelPaymentBtn');
-            const payNowBtn = document.getElementById('payNowBtn'); // New Pay Now button
-            const proceedToRideBtn = document.getElementById('proceedToRideBtn'); // Start Ride button
-            const paymentMethodSelected = document.getElementById('paymentMethodSelected');
-            const paymentAmountDisplay = document.getElementById('paymentAmountDisplay');
-            const paymentTitle = document.getElementById('paymentTitle');
-            const rideControlSection = document.getElementById('rideControl');
-            const paymentSection = document.getElementById('payment');
-            const pauseRideBtn = document.getElementById('pauseRideBtn');
-            const endRideBtn = document.getElementById('endRideBtn');
-            const batteryLevel = document.getElementById('batteryLevel');
-            const batteryPercentage = document.getElementById('batteryPercentage');
-            const estimatedTime = document.getElementById('estimatedTime');
-            const rideTimerDisplay = document.getElementById('rideTimerDisplay');
-            const timerMinutes = document.getElementById('timerMinutes');
-            const timerSeconds = document.getElementById('timerSeconds');
+        <div id="loader-overlay" class="loader-overlay"> <div class="loader"></div> </div>
 
-            // --- State Variables ---
-            let paymentTimeout;
-            let batteryInterval;
-            let currentBattery = 75;
-            let rideTimerInterval;
-            let rideSeconds = 0;
-            let isPaused = false;
-            let isLoggedIn = false; // Still track login state for UI updates
-            let currentUserName = '';
+        <script>
+            // --- Application Logic v8 ---
+            (function() {
+                'use strict';
 
+                // --- State ---
+                const appState = {
+                    currentScreen: 'landing-screen',
+                    currentRide: null,
+                    isBooking: false,
+                    selectedBikeForPayment: null,
+                    isDockExpanded: false,
+                    dockExpandTimeout: null,
+                    navigationHistory: ['landing-screen'],
+                };
 
-            // --- Mobile Menu ---
-            function toggleMobileMenu() {
-                const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
-                mobileMenuBtn.setAttribute('aria-expanded', !isExpanded);
-                mobileNav.classList.toggle('active');
-                overlay.classList.toggle('active');
-                mainContent.classList.toggle('blurred');
-                mobileMenuBtn.innerHTML = !isExpanded ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
-                document.body.style.overflow = !isExpanded ? 'hidden' : '';
-            }
-            mobileMenuBtn.addEventListener('click', toggleMobileMenu);
-            overlay.addEventListener('click', toggleMobileMenu);
-            mobileNavLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    if (mobileNav.classList.contains('active')) toggleMobileMenu();
-                });
-            });
+                // --- Config ---
+                // Icons updated below
 
-            // --- Sticky Header Shadow ---
-            window.addEventListener('scroll', () => {
-                mainHeader.style.boxShadow = window.scrollY > 50 ? '0 2px 10px rgba(0, 0, 0, 0.1)' : 'var(--box-shadow)';
-            });
+                // --- Dummy Data ---
+                const dummyBikes = [ { id: 'KB001', battery: 95, range: 28, baseFare: 20, perMinute: 5 }, { id: 'KB002', battery: 65, range: 19, baseFare: 20, perMinute: 5 }, { id: 'KB003', battery: 25, range: 7, baseFare: 15, perMinute: 4 }, { id: 'KB004', battery: 80, range: 24, baseFare: 20, perMinute: 5 }, { id: 'KB005', battery: 55, range: 16, baseFare: 20, perMinute: 5 }, { id: 'KB006', battery: 75, range: 22, baseFare: 20, perMinute: 5 }, { id: 'KB007', battery: 40, range: 12, baseFare: 15, perMinute: 4 }, { id: 'KB008', battery: 90, range: 27, baseFare: 20, perMinute: 5 }, { id: 'KB009', battery: 70, range: 21, baseFare: 20, perMinute: 5 }, { id: 'KB010', battery: 35, range: 10, baseFare: 15, perMinute: 4 }, ];
+                // --- NEW Themed Icons (Line Style) ---
+                const menuItems = [
+                    { id: 'landing-screen', label: 'Home', icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>' },
+                    { id: 'bike-list-screen', label: 'Bikes', icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.815a6 6 0 0 1 2.57-5.841Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 6a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5Z" /></svg>' }, // Map/Location icon
+                    { id: 'how-to-use-screen', label: 'How To', icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" /></svg>' }, // Question Mark
+                    { id: 'about-screen', label: 'About', icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>' }, // Info icon
+                    { id: 'what-we-do-screen', label: 'Vision', icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.355a15.015 15.015 0 0 1-7.5 0C4.508 20.49 2.25 18.227 2.25 15c0-1.372.648-2.645 1.68-3.532M20.07 11.468A15.015 15.015 0 0 1 12 10.5c-2.998 0-5.74-1.01-7.93-2.697M15 3.75a12.06 12.06 0 0 1 4.5 0m-3.75 2.355C13.18 7.51 12.597 8.25 12 9c-.597-.75-1.18-1.49-1.77-2.295M6.93 11.468A15.015 15.015 0 0 1 12 10.5c2.998 0 5.74 1.01 7.93 2.697" /></svg>' }, // Abstract/lightbulb like
+                    { id: 'careers-screen', label: 'Careers', icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.05a2.25 2.25 0 0 1-2.25 2.25h-12a2.25 2.25 0 0 1-2.25-2.25v-4.05m16.5 0a2.25 2.25 0 0 0-2.25-2.25h-12a2.25 2.25 0 0 0-2.25 2.25m16.5 0v-4.05a2.25 2.25 0 0 0-2.25-2.25h-12a2.25 2.25 0 0 0-2.25 2.25v4.05m0 0a2.25 2.25 0 0 1-2.25-2.25v-4.5a2.25 2.25 0 0 1 2.25-2.25h12a2.25 2.25 0 0 1 2.25 2.25v4.5a2.25 2.25 0 0 1-2.25 2.25m-16.5 0h16.5" /></svg>' }, // Briefcase
+                    { id: 'contact-screen', label: 'Contact', icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>' }, // Mail
+                    { id: 'feedback-screen', label: 'Feedback', icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>' }, // Chat Bubble
+                ];
 
-            // --- Active Nav Link Highlighting ---
-            function highlightNavLink() {
-                let scrollY = window.pageYOffset;
-                let currentSectionId = '';
-                sections.forEach(current => {
-                    const sectionTop = current.offsetTop - mainHeader.offsetHeight - 50;
-                    if (scrollY >= sectionTop && scrollY < sectionTop + current.offsetHeight) {
-                        currentSectionId = current.getAttribute('id');
-                    }
-                });
-                if (!currentSectionId && scrollY < sections[0].offsetTop) currentSectionId = sections[0].getAttribute('id');
-                if (!currentSectionId && scrollY >= document.body.scrollHeight - window.innerHeight - 50) currentSectionId = sections[sections.length - 1].getAttribute('id');
+                // --- DOM Elements ---
+                const loader = document.getElementById('loader-overlay');
+                const landingFindRideBtn = document.getElementById('find-ride-btn');
+                const bikeListUl = document.getElementById('bike-list');
+                const feedbackForm = document.getElementById('feedback-form');
+                const feedbackThanks = document.getElementById('feedback-thanks');
+                const bottomDock = document.getElementById('bottom-dock');
+                const backButton = document.getElementById('back-button');
+                const body = document.body;
 
-                desktopNavLinks.forEach(link => {
-                    link.classList.toggle('active', link.getAttribute('href') === `#${currentSectionId}`);
-                });
-                mobileNavLinks.forEach(link => {
-                    link.style.fontWeight = link.getAttribute('href') === `#${currentSectionId}` ? 'bold' : 'normal';
-                });
-            }
-            window.addEventListener('scroll', highlightNavLink);
-            highlightNavLink();
+                // --- Utilities ---
+                const showLoader = () => loader.classList.add('is-visible');
+                const hideLoader = () => loader.classList.remove('is-visible');
+                const showModal = (modalId) => document.getElementById(modalId)?.classList.add('is-visible');
+                const hideModal = (modalId) => document.getElementById(modalId)?.classList.remove('is-visible');
 
-            // --- Modal Handling ---
-            function openModal(modal) {
-                modal.classList.add('active');
-                mainContent.classList.add('blurred');
-                document.body.style.overflow = 'hidden';
-            }
-            function closeModal(modal) {
-                modal.classList.remove('active');
-                if (!loginModal.classList.contains('active') && !signupModal.classList.contains('active') && !paymentConfirmationView.classList.contains('active')) { // Check payment view too
-                    mainContent.classList.remove('blurred');
-                    document.body.style.overflow = '';
-                }
-            }
-            loginBtns.forEach(btn => btn.addEventListener('click', () => openModal(loginModal)));
-            signupBtns.forEach(btn => btn.addEventListener('click', () => openModal(signupModal)));
-            closeModalBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    closeModal(loginModal);
-                    closeModal(signupModal);
-                });
-            });
-            switchToSignup.addEventListener('click', (e) => { e.preventDefault(); closeModal(loginModal); openModal(signupModal); });
-            switchToLogin.addEventListener('click', (e) => { e.preventDefault(); closeModal(signupModal); openModal(loginModal); });
-            [loginModal, signupModal].forEach(modal => {
-                modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); });
-            });
-
-            // --- Mock Authentication UI Update ---
-            function updateAuthStateUI(loggedIn, name = '') {
-                 isLoggedIn = loggedIn; // Keep track of state
-                 currentUserName = name;
-                 userNameDesktop.textContent = `Hi, ${name}!`;
-                 userNameMobile.textContent = `Hi, ${name}!`;
-                 userProfileDesktop.style.display = loggedIn ? 'flex' : 'none';
-                 userProfileMobile.style.display = loggedIn ? 'block' : 'none';
-                 loginBtns.forEach(btn => btn.style.display = loggedIn ? 'none' : 'inline-block');
-                 signupBtns.forEach(btn => btn.style.display = loggedIn ? 'none' : 'inline-block');
-                 loginError.style.display = 'none';
-                 signupError.style.display = 'none';
-            }
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const email = document.getElementById('loginEmail').value;
-                if (email) {
-                     updateAuthStateUI(true, email.split('@')[0]);
-                     closeModal(loginModal);
-                     loginForm.reset();
-                } else {
-                    loginError.style.display = 'block';
-                }
-            });
-            signupForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const name = document.getElementById('signupName').value;
-                if (name) {
-                     updateAuthStateUI(true, name);
-                     closeModal(signupModal);
-                     signupForm.reset();
-                } else {
-                     signupError.style.display = 'block';
-                }
-            });
-            logoutBtns.forEach(btn => {
-                 btn.addEventListener('click', () => {
-                     updateAuthStateUI(false);
-                     if (mobileNav.classList.contains('active')) toggleMobileMenu();
-                 });
-            });
-
-            // --- UPDATED Payment Flow ---
-            paymentCards.forEach(card => {
-                card.addEventListener('click', () => {
-                    // REMOVED login check here
-
-                    const method = card.dataset.method;
-                    paymentMethodSelected.textContent = method;
-                    paymentAmountDisplay.textContent = "$1.00 Unlock Fee"; // Set amount
-                    paymentTitle.textContent = "Confirm Your Ride"; // Initial title
-                    paymentStatus.textContent = ''; // Clear status
-                    paymentStatus.className = ''; // Clear status classes
-                    paymentSpinner.style.display = 'none'; // Ensure spinner is hidden initially
-                    payNowBtn.style.display = 'inline-block'; // Show Pay Now button
-                    cancelPaymentBtn.style.display = 'inline-block'; // Show Cancel button
-                    proceedToRideBtn.style.display = 'none'; // Ensure Start Ride button is hidden
-
-                    // Show the payment confirmation view
-                    paymentConfirmationView.classList.add('active');
-                    mainContent.classList.add('blurred'); // Blur background
-                    document.body.style.overflow = 'hidden'; // Prevent background scroll
-                });
-            });
-
-            // Listener for the NEW Pay Now button
-            payNowBtn.addEventListener('click', () => {
-                paymentTitle.textContent = "Processing Payment..."; // Update title
-                paymentSpinner.style.display = 'block'; // Show spinner
-                payNowBtn.style.display = 'none'; // Hide Pay Now button
-                cancelPaymentBtn.style.display = 'none'; // Hide Cancel button during processing
-                paymentStatus.textContent = ''; // Clear status
-                paymentStatus.className = '';
-
-                // Simulate payment processing
-                clearTimeout(paymentTimeout);
-                paymentTimeout = setTimeout(() => {
-                    paymentSpinner.style.display = 'none'; // Hide spinner
-                    const isSuccess = Math.random() > 0.2; // 80% success rate
-
-                    if (isSuccess) {
-                        paymentTitle.textContent = "Payment Successful!";
-                        paymentStatus.textContent = 'Your ride is ready.';
-                        paymentStatus.className = 'success';
-                        proceedToRideBtn.style.display = 'inline-block'; // Show Start Ride button
-                        cancelPaymentBtn.style.display = 'none'; // Keep cancel hidden on success
+                // --- Navigation & Screen Transitions ---
+                const navigateToScreen = (screenId, isBack = false) => {
+                    if (appState.currentScreen === screenId || !screenId) return;
+                    const currentScreenEl = document.getElementById(appState.currentScreen);
+                    const nextScreenEl = document.getElementById(screenId);
+                    if (currentScreenEl && nextScreenEl) {
+                        if (!isBack) {
+                            if (appState.navigationHistory[appState.navigationHistory.length - 1] !== screenId) {
+                                appState.navigationHistory.push(screenId);
+                            }
+                        }
+                        console.log("History:", appState.navigationHistory);
+                        currentScreenEl.classList.add('is-exiting');
+                        setTimeout(() => {
+                            currentScreenEl.classList.remove('is-active', 'is-exiting');
+                            nextScreenEl.classList.add('is-active');
+                            appState.currentScreen = screenId;
+                            updateActiveDockButton(screenId);
+                            updateBackButtonVisibility();
+                            if (screenId === 'bike-list-screen') populateBikeList(dummyBikes);
+                            if (nextScreenEl.classList.contains('content-screen')) nextScreenEl.scrollTop = 0;
+                        }, 500);
                     } else {
-                        paymentTitle.textContent = "Payment Failed";
-                        paymentStatus.textContent = 'Please try again or cancel.';
-                        paymentStatus.className = 'error';
-                        payNowBtn.style.display = 'inline-block'; // Show Pay Now again on failure
-                        cancelPaymentBtn.style.display = 'inline-block'; // Show Cancel button again on failure
+                        console.error(`Screen not found: ${screenId}`);
                     }
-                }, 2500); // Simulate 2.5 seconds
-            });
+                };
 
-            // Close payment view function
-            function closePaymentView() {
-                 clearTimeout(paymentTimeout);
-                 paymentConfirmationView.classList.remove('active');
-                 // Only remove blur if no other modal is active
-                 if (!loginModal.classList.contains('active') && !signupModal.classList.contains('active')) {
-                     mainContent.classList.remove('blurred');
-                     document.body.style.overflow = '';
-                 }
-            }
+                 // --- Back Button Logic ---
+                 const goBack = () => {
+                     if (appState.navigationHistory.length > 1) {
+                          appState.navigationHistory.pop();
+                          const previousScreenId = appState.navigationHistory[appState.navigationHistory.length - 1];
+                          navigateToScreen(previousScreenId, true);
+                     } else { console.log("No previous screen in history."); }
+                 };
 
-            // Attach close function to Cancel button and overlay click
-            cancelPaymentBtn.addEventListener('click', closePaymentView);
-            paymentConfirmationView.addEventListener('click', (e) => {
-                 if (e.target === paymentConfirmationView) { // Click on backdrop
-                     // Only close if payment isn't processing (spinner not visible)
-                     if (paymentSpinner.style.display === 'none') {
-                         closePaymentView();
-                     }
-                 }
-            });
+                 const updateBackButtonVisibility = () => {
+                      backButton.classList.toggle('is-visible', appState.navigationHistory.length > 1);
+                 };
+
+                // --- Expanding Dock Navigation ---
+                const createDockMenu = () => {
+                     bottomDock.innerHTML = ''; // Clear existing
+                     menuItems.forEach(item => {
+                          const button = document.createElement('button');
+                          button.className = 'dock-item';
+                          button.dataset.targetScreen = item.id;
+                          button.title = item.label;
+                          // Use stroke-based icons by default
+                          button.innerHTML = `${item.icon}<span>${item.label}</span>`;
+                          button.addEventListener('click', (e) => {
+                               createRipple(e, button); // Add ripple
+                               setTimeout(() => { // Navigate after ripple starts
+                                    navigateToScreen(item.id);
+                                    toggleDock(false);
+                               }, 150);
+                          });
+                          bottomDock.appendChild(button);
+                     });
+                 };
+
+                const updateActiveDockButton = (activeScreenId) => {
+                    bottomDock.querySelectorAll('.dock-item').forEach(button => {
+                        button.classList.toggle('is-active', button.dataset.targetScreen === activeScreenId);
+                    });
+                };
+
+                const toggleDock = (expand) => {
+                    clearTimeout(appState.dockExpandTimeout);
+                    const shouldExpand = expand && !appState.isDockExpanded;
+                    const shouldCollapse = !expand && appState.isDockExpanded && !bottomDock.matches(':hover');
+
+                    if (shouldExpand) {
+                        bottomDock.classList.add('is-expanded');
+                        appState.isDockExpanded = true;
+                        // Set timeout to auto-collapse after a delay if not hovered
+                        appState.dockExpandTimeout = setTimeout(() => {
+                            if (!bottomDock.matches(':hover')) { // Check hover again before collapsing
+                                toggleDock(false);
+                            }
+                        }, 3000); // Increased auto-collapse time
+                    } else if (shouldCollapse) {
+                        bottomDock.classList.remove('is-expanded');
+                        appState.isDockExpanded = false;
+                    } else if (!expand && appState.isDockExpanded && bottomDock.matches(':hover')) {
+                         // If trying to collapse but still hovered, check again later
+                          appState.dockExpandTimeout = setTimeout(() => toggleDock(false), 1000);
+                    }
+                };
+
+                 // --- Ripple Effect ---
+                 const createRipple = (event, button) => {
+                     const ripple = document.createElement("span");
+                     const rect = button.getBoundingClientRect();
+                     // Calculate size based on the button element itself for better fit
+                     const size = Math.max(button.clientWidth, button.clientHeight);
+                     // Calculate position relative to the button, not viewport
+                     const x = event.offsetX - size / 2;
+                     const y = event.offsetY - size / 2;
+
+                     ripple.style.width = ripple.style.height = `${size}px`;
+                     ripple.style.left = `${x}px`;
+                     ripple.style.top = `${y}px`;
+                     ripple.classList.add("ripple");
+
+                     const existingRipple = button.querySelector(".ripple");
+                     if (existingRipple) { existingRipple.remove(); }
+                     button.appendChild(ripple);
+                     ripple.addEventListener('animationend', () => { ripple.remove(); });
+                 };
 
 
-            // Listener for the Start Ride button (after successful payment)
-            proceedToRideBtn.addEventListener('click', () => {
-                closePaymentView();
-                paymentSection.style.display = 'none';
-                rideControlSection.style.display = 'block';
-                rideControlSection.scrollIntoView({ behavior: 'smooth' });
-                startRideTimer();
-                simulateBatteryDrain();
-            });
+                // --- Bike List ---
+                const populateBikeList = (bikes) => { /* ... (same as v4) ... */ if (!bikeListUl) return; bikeListUl.innerHTML = ''; if (bikes.length === 0) { bikeListUl.innerHTML = '<li>No bikes available.</li>'; return; } bikes.forEach(bike => { const li = document.createElement('li'); li.className = 'bike-list-item'; let batteryColor = bike.battery > 70 ? 'var(--color-success)' : bike.battery >= 30 ? 'var(--color-warning)' : 'var(--color-error)'; li.innerHTML = ` <div class="bike-info"> <h3>Bike ${bike.id}</h3> <p><svg style="color:${batteryColor};" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd" /></svg>Battery: ${bike.battery}%</p> <p><svg style="color:var(--color-primary);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M5.478 5.558A7.5 7.5 0 1 0 18.522 5.558l-3.28 3.281a.75.75 0 0 0-1.06 1.06l3.41 3.41a.75.75 0 0 0 1.18-.233l1.02-1.7a.75.75 0 0 0-.297-1.005l-4.079-2.913a.75.75 0 0 0-.88 1.172l1.817 1.298-1.79 1.79a.75.75 0 0 0 0 1.06l.72.72a.75.75 0 0 0 1.06 0l1.79-1.79 1.298 1.817a.75.75 0 0 0 1.172-.88l-2.913-4.079a.75.75 0 0 0-1.005-.297l-1.7 1.02a.75.75 0 0 0-.233 1.18l3.41 3.41a.75.75 0 0 0 1.06-1.06l-3.28-3.28Z" clip-rule="evenodd" /></svg>Range: ${bike.range} km</p> </div> <div class="bike-actions"> <button class="book-bike-btn" data-bike-id="${bike.id}">Book</button> </div>`; bikeListUl.appendChild(li); }); };
 
-            // --- Ride Control Simulation ---
-            function formatTime(totalSeconds) {
-                 const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-                 const seconds = String(totalSeconds % 60).padStart(2, '0');
-                 return { minutes, seconds };
-            }
-            function startRideTimer() {
-                 clearInterval(rideTimerInterval);
-                 rideSeconds = 0;
-                 isPaused = false;
-                 pauseRideBtn.textContent = 'Pause Ride';
-                 pauseRideBtn.className = 'btn btn-secondary'; // Reset class
-                 rideTimerInterval = setInterval(() => {
-                     if (!isPaused) {
-                         rideSeconds++;
-                         const time = formatTime(rideSeconds);
-                         timerMinutes.textContent = time.minutes;
-                         timerSeconds.textContent = time.seconds;
-                     }
-                 }, 1000);
-            }
-            function stopRideTimer() { clearInterval(rideTimerInterval); }
-            function updateBatteryDisplay() {
-                const percentage = Math.max(0, Math.min(100, Math.round(currentBattery)));
-                batteryLevel.style.width = `${percentage}%`;
-                batteryPercentage.textContent = `${percentage}%`;
-                const minutesLeft = Math.round(currentBattery); // Simple 1%=1min estimate
-                estimatedTime.textContent = `Estimated time left: ${minutesLeft} mins`;
-                if (percentage > 50) batteryLevel.style.backgroundColor = 'var(--primary-color)';
-                else if (percentage > 20) batteryLevel.style.backgroundColor = 'var(--accent-color)';
-                else batteryLevel.style.backgroundColor = 'var(--danger-color)';
-                batteryLevel.classList.toggle('full', percentage === 100);
-            }
-            function simulateBatteryDrain() {
-                clearInterval(batteryInterval);
-                currentBattery = 75; // Reset battery
-                updateBatteryDisplay();
-                batteryInterval = setInterval(() => {
-                     if (!isPaused && currentBattery > 0) {
-                         currentBattery -= 0.2; // Drain rate
-                         updateBatteryDisplay();
-                     }
-                     if (currentBattery <= 0) {
-                         clearInterval(batteryInterval);
-                         estimatedTime.textContent = 'Battery depleted!';
-                     }
-                }, 5000); // Update interval
-            }
-             pauseRideBtn.addEventListener('click', () => {
-                 isPaused = !isPaused;
-                 pauseRideBtn.textContent = isPaused ? 'Resume Ride' : 'Pause Ride';
-                 pauseRideBtn.className = isPaused ? 'btn btn-success' : 'btn btn-secondary';
-             });
-            endRideBtn.addEventListener('click', () => {
-                clearInterval(batteryInterval);
-                stopRideTimer();
-                const finalTime = formatTime(rideSeconds);
-                const cost = (1 + (rideSeconds / 60) * 0.15).toFixed(2);
-                // Use a more robust notification system in a real app
-                alert(`Ride Ended!\nDuration: ${finalTime.minutes}:${finalTime.seconds}\nEstimated Cost: $${cost}`);
-                rideControlSection.style.display = 'none';
-                paymentSection.style.display = 'block';
-                paymentSection.scrollIntoView({ behavior: 'smooth' });
-            });
+                // --- Booking Flow ---
+                const startBookingProcess = (bikeId) => { /* ... (same as v4) ... */ if (appState.isBooking) return; appState.isBooking = true; const bike = dummyBikes.find(b => b.id === bikeId); if (!bike) { console.error("Bike not found:", bikeId); appState.isBooking = false; return; } appState.selectedBikeForPayment = bike; document.getElementById('payment-bike-id').textContent = bike.id; const initialCost = bike.baseFare || 20; document.getElementById('payment-amount').textContent = `₹${initialCost.toFixed(2)}`; showModal('payment-confirm-modal'); };
+                const confirmPaymentAndStartRide = () => { /* ... (same as v4) ... */ if (!appState.selectedBikeForPayment) { appState.isBooking = false; return; } hideModal('payment-confirm-modal'); showLoader(); setTimeout(() => { hideLoader(); showModal('booking-success-modal'); setTimeout(() => { hideModal('booking-success-modal'); startRide(appState.selectedBikeForPayment.id); appState.selectedBikeForPayment = null; }, 1500); }, 1000); };
+                const startRide = (bikeId) => { /* ... (same as v4) ... */ const startTime = Date.now(); let seconds = 0; let distance = 0.0; document.getElementById('ride-bike-id').textContent = bikeId; document.getElementById('ride-timer').textContent = '00:00'; document.getElementById('ride-distance').textContent = '0.0 km'; const timerInterval = setInterval(() => { seconds++; const mins = Math.floor(seconds / 60).toString().padStart(2, '0'); const secs = (seconds % 60).toString().padStart(2, '0'); document.getElementById('ride-timer').textContent = `${mins}:${secs}`; distance += 0.05; document.getElementById('ride-distance').textContent = `${distance.toFixed(1)} km`; }, 1000); appState.currentRide = { bikeId, startTime, timerInterval, distance }; showModal('active-ride-modal'); appState.isBooking = false; };
+                const endRide = () => { /* ... (same as v4) ... */ if (!appState.currentRide) return; clearInterval(appState.currentRide.timerInterval); const endTime = Date.now(); const durationMs = endTime - appState.currentRide.startTime; const durationSecs = Math.round(durationMs / 1000); const durationMins = Math.floor(durationSecs / 60); const durationSecsRemainder = durationSecs % 60; const finalDistance = parseFloat(document.getElementById('ride-distance').textContent); const bike = dummyBikes.find(b => b.id === appState.currentRide.bikeId) || { baseFare: 20, perMinute: 5 }; const estimatedCost = bike.baseFare + (durationMins * bike.perMinute); document.getElementById('summary-duration').textContent = `${durationMins.toString().padStart(2, '0')}:${durationSecsRemainder.toString().padStart(2, '0')}`; document.getElementById('summary-distance').textContent = `${finalDistance.toFixed(1)} km`; document.getElementById('summary-cost').textContent = `₹${estimatedCost.toFixed(2)}`; hideModal('active-ride-modal'); showModal('ride-summary-modal'); appState.currentRide = null; };
 
-            // --- Footer Year ---
-            document.getElementById('currentYear').textContent = new Date().getFullYear();
+                // --- Feedback Form ---
+                const handleFeedbackSubmit = (event) => { /* ... (same as v4) ... */ event.preventDefault(); const message = document.getElementById('feedback-message').value; if (!message.trim()) { alert('Please enter your feedback message.'); return; } console.log('Feedback submitted (simulated):', { email: document.getElementById('feedback-email').value, message: message }); feedbackForm.style.display = 'none'; feedbackThanks.style.display = 'block'; setTimeout(() => { feedbackThanks.style.display = 'none'; feedbackForm.style.display = 'block'; feedbackForm.reset(); }, 3000); };
 
-        }); // End DOMContentLoaded
-    </script>
+                // --- Event Listeners ---
+                const setupEventListeners = () => {
+                    // Navigate and expand dock on landing CTA click
+                    landingFindRideBtn.addEventListener('click', () => {
+                        toggleDock(true); // Expand the dock first
+                        navigateToScreen(landingFindRideBtn.dataset.targetScreen);
+                    });
 
-</body>
-</html>
+                    // Expanding Dock Listeners
+                    bottomDock.addEventListener('mouseenter', () => toggleDock(true));
+                    bottomDock.addEventListener('mouseleave', () => {
+                         appState.dockExpandTimeout = setTimeout(() => toggleDock(false), 300);
+                    });
+                    bottomDock.addEventListener('click', (e) => {
+                         if (window.matchMedia("(pointer: coarse)").matches) {
+                              // If clicking the dock background itself on touch, toggle expansion
+                              if (e.target === bottomDock) {
+                                   toggleDock(!appState.isDockExpanded);
+                              } else {
+                                   // If clicking an item (handled by item's listener), ensure dock stays expanded briefly
+                                   toggleDock(true);
+                              }
+                         }
+                    });
+                     // Collapse dock if clicking outside (body click)
+                     document.addEventListener('click', (e) => {
+                          if (!bottomDock.contains(e.target) && appState.isDockExpanded) {
+                               toggleDock(false);
+                          }
+                     }, true); // Use capture phase to catch click before item click potentially stops propagation
+
+
+                    // Back Button Listener
+                    backButton.addEventListener('click', goBack);
+
+                    // Bike List Booking
+                    if (bikeListUl) { bikeListUl.addEventListener('click', (event) => { if (event.target?.classList.contains('book-bike-btn')) { startBookingProcess(event.target.dataset.bikeId); } }); }
+
+                    // Booking Flow Buttons
+                    document.getElementById('confirm-payment-btn')?.addEventListener('click', confirmPaymentAndStartRide);
+                    document.getElementById('end-ride-btn')?.addEventListener('click', endRide);
+
+                    // Modal Close Buttons
+                    document.querySelectorAll('.modal-close-btn').forEach(btn => { btn.addEventListener('click', () => { const modalId = btn.dataset.modalId; if (modalId) hideModal(modalId); if (modalId === 'payment-confirm-modal') appState.isBooking = false; }); });
+
+                    // Feedback Form
+                    if (feedbackForm) { feedbackForm.addEventListener('submit', handleFeedbackSubmit); }
+                };
+
+                // --- Initialization ---
+                document.addEventListener('DOMContentLoaded', () => {
+                    console.log('DOM Loaded. Initializing app v8...');
+                    createDockMenu(); // Create dock menu items
+                    setupEventListeners();
+                    const initialScreen = document.getElementById(appState.currentScreen);
+                    if(initialScreen) {
+                        initialScreen.classList.add('is-active');
+                        updateActiveDockButton(appState.currentScreen); // Set initial active dock button
+                        updateBackButtonVisibility(); // Check initial back button state
+                    } else {
+                        console.error("Initial screen not found!");
+                    }
+                });
+
+            })(); // End IIFE
+        </script>
+
+    </body>
+    </html>
+    
