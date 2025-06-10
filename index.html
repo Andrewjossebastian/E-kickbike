@@ -1,57 +1,109 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kickbike Control</title>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
+  <!-- Razorpay Checkout -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <!-- Style -->
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
     body {
-      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom right, #e0f7fa, #e1bee7);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background: white;
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
       text-align: center;
-      margin-top: 50px;
+      max-width: 400px;
+      width: 90%;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .container:hover {
+      transform: scale(1.01);
+    }
+
+    h1 {
+      color: #2e7d32;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 30px;
     }
 
     button {
-      padding: 10px 20px;
+      padding: 14px 30px;
       font-size: 16px;
-      margin: 10px;
       border: none;
-      border-radius: 5px;
+      border-radius: 10px;
       cursor: pointer;
-    }
-
-    #startButton {
-      background-color: green;
-      color: white;
-    }
-
-    #stopButton {
-      background-color: red;
-      color: white;
+      margin: 10px 0;
+      width: 100%;
+      transition: all 0.2s ease-in-out;
     }
 
     #paymentButton {
-      background-color: blue;
+      background: #43a047;
       color: white;
+    }
+
+    #paymentButton:hover {
+      background: #2e7d32;
+    }
+
+    #stopButton {
+      background: #ef5350;
+      color: white;
+    }
+
+    #stopButton:hover {
+      background: #c62828;
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #888;
     }
   </style>
 </head>
 
 <body>
-  <h1>Kickbike Control</h1>
-  <p>Control the kickbike by sending START/STOP signals to Firebase and make payments via UPI.</p>
+  <div class="container">
+    <h1>Kickbike Control</h1>
+    <p>Make payment to start your kickbike ride. Stop the ride when done.</p>
 
-  <!-- Buttons -->
-  <button id="startButton">Start</button>
-  <button id="stopButton">Stop</button>
-  <button id="paymentButton">Pay with UPI</button>
+    <button id="paymentButton">Pay ₹5 & Start</button>
+    <button id="stopButton">Stop Ride</button>
+
+    <div class="footer">Powered by Firebase & Razorpay</div>
+  </div>
 
   <script>
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAPBxUbUF_d5VuDJoBCRuMtLIKIZp7yJwU",
       authDomain: "e-kickbike.firebaseapp.com",
@@ -63,71 +115,45 @@
       measurementId: "G-LD6T8FHX8F"
     };
 
-    // Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const database = firebase.database(app);
 
-    // Start/Stop button functionality
-    document.getElementById('startButton').addEventListener('click', () => {
-      firebase.database().ref('kickbike/command').set(
-        { action: 'start' }
-      ).then(() => {
-        alert('Kickbike started!');
-      }).catch((error) => {
-        console.error('Error updating Firebase:', error);
-        alert('Failed to update Firebase.');
-      });
+    document.getElementById('paymentButton').addEventListener('click', () => {
+      const options = {
+        key: "rzp_live_4Q8jp85PoPrc7x",
+        amount: 500,
+        currency: "INR",
+        name: "E-Kickbike",
+        description: "Kickbike Ride Start",
+        handler: function (response) {
+          firebase.database().ref('kickbike/command').set({ action: 'start' })
+            .then(() => alert("✅ Payment successful! Kickbike started."))
+            .catch((error) => {
+              console.error("Firebase error:", error);
+              alert("❌ Payment done, but could not start the Kickbike.");
+            });
+        },
+        prefill: {
+          name: "",
+          email: "",
+          contact: ""
+        },
+        theme: {
+          color: "#2e7d32"
+        }
+      };
+      const rzp = new Razorpay(options);
+      rzp.open();
     });
 
     document.getElementById('stopButton').addEventListener('click', () => {
-      firebase.database().ref('kickbike/command').set(
-        { action: 'Stop' }
-      ).then(() => {
-        alert('Kickbike stopped!');
-      }).catch((error) => {
-        console.error('Error updating Firebase:', error);
-        alert('Failed to update Firebase.');
-      });
-    });
-
-    // Payment functionality
-    document.getElementById('paymentButton').addEventListener('click', () => {
-      const paymentDetails = {
-        amount: 5,  // Example amount
-        upi_id: 'andrewjossebastian@oksbi',  // Replace with actual UPI ID
-      };
-
-      const apiEndpoint = 'https://in.staging.decentro.tech/core_banking/money_transfer/manage_beneficiaries';  // Replace with actual endpoint for testing
-
-      const payload = {
-        amount: paymentDetails.amount,
-        upi_id: paymentDetails.upi_id,
-        client_id: 'Fabx_6_sop',  // Replace with your actual client ID for testing
-        client_secret: '885846772f6b4b4b980ed59014457868',  // Replace with your actual client secret for testing
-      };
-
-      // Making the payment request to Decentro API (Replace with actual API endpoint and payload)
-      fetch(apiEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === 'success') {
-          alert('Payment successful!');
-        } else {
-          alert('Payment failed: ' + data.message);
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('There was an error processing the payment.');
-      });
+      firebase.database().ref('kickbike/command').set({ action: 'Stop' })
+        .then(() => alert('🛑 Kickbike stopped!'))
+        .catch(error => {
+          console.error('Error updating Firebase:', error);
+          alert('❌ Failed to stop Kickbike.');
+        });
     });
   </script>
 </body>
-
 </html>
